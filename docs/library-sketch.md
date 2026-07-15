@@ -142,6 +142,26 @@ arguably `DisjunctionPigeonhole` are hatch material. Most rules pretty,
 the combinatorial monsters escape-hatched but still scheduled and
 tested — that ratio is the design working.
 
+**The hatch's poster boy: Régin's alldifferent (1994).** The most
+famous algorithm-inside-a-rule in constraint programming: an
+alldifferent constraint induces a bipartite variables↔values graph;
+build a maximum matching and prune every edge in no maximum matching —
+a full graph algorithm (matching + SCC decomposition) as one inference
+step, constitutionally inexpressible in a conjunctive-query eDSL. This
+is why real CP solvers have exactly our two-tier architecture
+(declarative constraints + "global propagators" that are arbitrary
+algorithms): the hatch is the industry's load-bearing wall, not an
+apology. It lands on both existing clients — Sudoku's rows/columns/
+boxes are alldifferents, and the fish patterns and hidden subsets are
+shadows of matching-based filtering; kibitzer's `DisjunctionCapacity`
+is a hand-rolled Hall's-theorem special case groping toward it. And it
+upgrades the provenance story: Régin's prunes carry *real
+certificates* — every pruned edge is witnessed by a Hall set (k
+variables spanning only k values, extractable from the SCCs) whose
+member facts are honest premises. So prim-rule provenance is graded:
+**certificate-producing** where the algorithm admits a witness,
+anchor-only where it doesn't.
+
 ### 3. Perspectives
 
 Generalise `Observe`: a perspective is a projection of the event stream;
@@ -329,7 +349,13 @@ everything into one:
   the gap between them replays kibitzer's watcher-vs-Z3 story in a
   domain everyone knows, and "this puzzle requires guessing" becomes a
   theorem the library proves about itself. Singles/pairs are
-  eDSL-shaped; fish patterns deliberately stress the hatch boundary.
+  eDSL-shaped; fish patterns deliberately stress the hatch boundary —
+  and the hatch's poster boy (Régin's alldifferent, above) subsumes
+  the whole fish/subset family, enabling the demo's best page: with
+  all-justifications recording (#3), one pencil-mark prune arrives on
+  the feed twice — "X-wing on rows 3/7" from the human-tier eDSL rule
+  and "in no maximum matching, Hall set {…}" from the prim rule — the
+  two tiers proving the same fact in different vocabularies.
 - **kibitzer** — perspectives (stays the flagship, in its own repo;
   acceptance test = core rebuilt on the library, goldens unchanged).
 - **Harmonia** — windows + the tonal-ambiguity meter.
@@ -383,6 +409,9 @@ everything into one:
 
 - Jon Doyle, *A Truth Maintenance System* (1979) — the JTMS proper.
 - Johan de Kleer, *An Assumption-based TMS* (1986) — the labels.
+- Jean-Charles Régin, *A filtering algorithm for constraints of
+  difference in CSPs* (1994) — the poster-boy global propagator; the
+  precedent for algorithm-shaped rules with certificate provenance.
 - Radul & Sussman, *The Art of the Propagator* (2009) — cells, monotone
   merge, provenance as motivating payload.
 - Kmett: [propagators](https://github.com/ekmett/propagators) (talk
