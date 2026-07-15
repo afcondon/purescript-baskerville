@@ -364,6 +364,34 @@ everything into one:
   solve and emit "why was 2.3 excluded" narratives for actual
   packages. A demo over real registry data is worth ten toys.
 
+## Neighbours: hylograph-graph
+
+No overlap by design — hylograph-graph is algorithms *on* graphs, this
+library is justified facts (which sometimes concern, or produce,
+graphs) — but the two should be comfortably compatible, and the seams
+are concrete:
+
+1. **Prim rules call it.** The Régin poster boy needs bipartite
+   machinery + SCC decomposition, and hylograph-graph already ships
+   `stronglyConnectedComponents` and `detectBipartite`; the one
+   missing ingredient, maximum bipartite matching (Hopcroft–Karp),
+   belongs in hylograph-graph rather than here. The flagship
+   escape-hatch rule is thereby a composition demo: the inference
+   library's hardest rule implemented by calling the graph library.
+   Both sides are pure functions over `Ord node` — the same purity
+   discipline as `fire`, so they compose with no adapter layer.
+2. **The derivation DAG exports as `SimpleGraph FactId`** (plus a
+   payload map). Then all of hylograph-graph applies to proof
+   structures for free: `sugiyamaLayout` draws cascades,
+   `transitiveReduction` declutters redundant premise edges in dense
+   derivations, `reachableFrom` answers "everything downstream of
+   this axiom". Kibitzer's orbits/skylines already prove
+   proof-DAGs-as-graph-data pays; make the conversion one function.
+3. **Graphs as axiom sources.** The ShapedSteer client runs the other
+   direction: hylograph-graph calls in observation position generate
+   axiom facts *about* a workbench graph (reachability, cycles,
+   topological layers), which the rules then reason over.
+
 ## Non-goals (v1)
 
 - Doyle's non-monotonic labelling and retraction (#6) — and therefore
