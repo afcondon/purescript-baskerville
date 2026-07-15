@@ -11,8 +11,8 @@ import Data.Set as Set
 import Effect (Effect)
 import Effect.Console (log)
 import Jtms.Explain (axiomsBehind, explain)
-import Jtms.Kernel (Why(..), factCount, facts)
-import Sudoku.Board (allCells)
+import Jtms.Kernel (Why(..), factCount, facts, justificationsFor)
+import Sudoku.Board (Cell(..), Digit(..), allCells)
 import Sudoku.Fixtures (blankColumnsPuzzle, diagonalsPuzzle, patternValue)
 import Sudoku.Rules (SudokuClaim(..), SudokuRule(..), consistent)
 import Sudoku.Solve (isSolved, solve, solvedCount, valueAt)
@@ -83,6 +83,21 @@ runSudokuTests = do
     assert $ hiddenSingles # Array.all \fact -> case fact.why of
       ByRule d -> Array.length d.premises == 8
       Axiom _ -> false
+
+  log "Sudoku: one elimination, two proofs — SoleDigit and PeerElimination"
+  do
+    -- r1c2 is a given 2 and its neighbour r1c3 a given 3, so "r1c2 is not
+    -- 3" is derivable both from its own placement and from its peer's.
+    let kb = solve diagonalsPuzzle
+    let cell = Cell 1
+    let js = justificationsFor (Not cell (Digit 3)) kb
+    assert (Array.length js >= 2)
+    let
+      rulesSeen = js # Array.mapMaybe case _ of
+        ByRule d -> Just d.rule
+        Axiom _ -> Nothing
+    assert (Array.elem SoleDigit rulesSeen)
+    assert (Array.elem PeerElimination rulesSeen)
 
   log "Sudoku: every deduction is grounded in givens alone"
   do

@@ -25,6 +25,8 @@ module Jtms.Kernel
   , emptyKB
   , assertAxiom
   , addFact
+  , justificationsFor
+  , sameDerivation
   , isKnown
   , factIdFor
   , factFor
@@ -53,6 +55,20 @@ data Why rule ax
       , anchors :: Array ax
       }
 
+derive instance (Eq rule, Eq ax) => Eq (Why rule ax)
+
+-- | Derivation identity: what individuates a justification is its content
+-- | — the rule and what it consumed — not `source`, which only records
+-- | when the inference was first noticed. Rederiving the same conclusion
+-- | from the same premises while processing a later event is the same
+-- | derivation, and `addFact` must not collect it twice.
+sameDerivation :: forall rule ax. Eq rule => Eq ax => Why rule ax -> Why rule ax -> Boolean
+sameDerivation = case _, _ of
+  Axiom a, Axiom b -> a == b
+  ByRule x, ByRule y -> x.rule == y.rule && x.premises == y.premises && x.anchors == y.anchors
+  Axiom _, ByRule _ -> false
+  ByRule _, Axiom _ -> false
+
 newtype FactId = FactId Int
 
 derive instance Eq FactId
@@ -61,7 +77,20 @@ derive instance Ord FactId
 instance Show FactId where
   show (FactId i) = "(FactId " <> show i <> ")"
 
-type Fact claim rule ax = { id :: FactId, claim :: claim, why :: Why rule ax }
+-- | `why` is the primary justification — first derivation wins — and the
+-- | only one the acyclicity guarantee covers: its premises point at
+-- | strictly smaller ids. `alsoWhy` records every *other* way the claim
+-- | was later rederived. Those may cite facts born after this one, so
+-- | they are evidence of rederivability, not independently well-founded
+-- | proofs — checking an alternative for well-founded support is ATMS
+-- | work (extensions catalogue #7). Recording them now is what keeps
+-- | that door open, and it is what lets a UI say "X-wing sees it too".
+type Fact claim rule ax =
+  { id :: FactId
+  , claim :: claim
+  , why :: Why rule ax
+  , alsoWhy :: Array (Why rule ax)
+  }
 
 -- | The knowledge base: an append-only feed of facts, the hash-consing
 -- | index over their claims (doubling as the premise lookup), and the
@@ -75,22 +104,34 @@ newtype KB res claim rule ax = KB
 emptyKB :: forall res claim rule ax. res -> KB res claim rule ax
 emptyKB res = KB { facts: [], index: Map.empty, residue: res }
 
--- | Record a claim, if it is news. The first justification wins; a claim
--- | rederivable six ways still appears on the feed exactly once.
+-- | Record a claim. News gets a fresh fact; a claim already on the feed
+-- | keeps its place and its primary justification, and the new derivation
+-- | is appended to `alsoWhy` if it is genuinely different — so a claim
+-- | rederivable six ways appears once, remembering all six.
 addFact
   :: forall res claim rule ax
    . Ord claim
+  => Eq rule
+  => Eq ax
   => { claim :: claim, why :: Why rule ax }
   -> KB res claim rule ax
   -> KB res claim rule ax
 addFact { claim, why } whole@(KB kb) = case Map.lookup claim kb.index of
-  Just _ -> whole
+  Just (FactId i) -> case Array.index kb.facts i of
+    Nothing -> whole
+    Just existing
+      | sameDerivation why existing.why
+          || Array.any (sameDerivation why) existing.alsoWhy -> whole
+      | otherwise ->
+          case Array.updateAt i (existing { alsoWhy = Array.snoc existing.alsoWhy why }) kb.facts of
+            Nothing -> whole
+            Just updated -> KB kb { facts = updated }
   Nothing ->
     let
       id = FactId (Array.length kb.facts)
     in
       KB kb
-        { facts = Array.snoc kb.facts { id, claim, why }
+        { facts = Array.snoc kb.facts { id, claim, why, alsoWhy: [] }
         , index = Map.insert claim id kb.index
         }
 
@@ -99,11 +140,24 @@ addFact { claim, why } whole@(KB kb) = case Map.lookup claim kb.index of
 assertAxiom
   :: forall res claim rule ax
    . Ord claim
+  => Eq rule
+  => Eq ax
   => ax
   -> claim
   -> KB res claim rule ax
   -> KB res claim rule ax
 assertAxiom ax claim = addFact { claim, why: Axiom ax }
+
+-- | Every recorded justification for a claim, primary first.
+justificationsFor
+  :: forall res claim rule ax
+   . Ord claim
+  => claim
+  -> KB res claim rule ax
+  -> Array (Why rule ax)
+justificationsFor claim kb = case factFor claim kb of
+  Nothing -> []
+  Just fact -> Array.cons fact.why fact.alsoWhy
 
 isKnown :: forall res claim rule ax. Ord claim => claim -> KB res claim rule ax -> Boolean
 isKnown claim (KB kb) = Map.member claim kb.index

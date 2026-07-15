@@ -12,7 +12,7 @@ import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Console (log)
 import Jtms.Engine (Engine, learn)
-import Jtms.Kernel (Why(..), emptyKB, factCount, facts, knownClaims)
+import Jtms.Kernel (Why(..), emptyKB, factCount, facts, justificationsFor, knownClaims)
 import Jtms.Rule (each, matches, require, rule)
 import Test.Assert (assert, assertEqual)
 import Test.KernelSpec (Ax(..), Claim(..), Rule(..), ToyKB, primEngine)
@@ -79,6 +79,23 @@ runRuleTests = do
       Just f -> case f.why of
         ByRule d -> assertEqual { actual: Array.length d.premises, expected: 2 }
         Axiom _ -> assert false
+
+  log "Kernel: rederivations are remembered — justificationsFor, primary first"
+  do
+    -- a -> b -> c -> d: Reach a d composes two ways ((ab·bd) and (ac·cd))
+    let kb = feedWith edslEngine chain
+    let js = justificationsFor (Reach "a" "d") kb
+    assert (Array.length js >= 2)
+    -- all alternatives are rule derivations, none an axiom
+    assert $ js # Array.all case _ of
+      ByRule _ -> true
+      Axiom _ -> false
+    -- and the record is stable: saturating again adds nothing
+    let again = learn edslEngine kb { source: Observed 42, claims: [] }
+    assertEqual
+      { actual: Array.length (justificationsFor (Reach "a" "d") again)
+      , expected: Array.length js
+      }
 
   log "Rule eDSL: require agrees with matches"
   do

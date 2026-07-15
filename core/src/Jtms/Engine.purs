@@ -53,6 +53,8 @@ type Engine res claim rule ax =
 saturate
   :: forall res claim rule ax
    . Ord claim
+  => Eq rule
+  => Eq ax
   => Eq res
   => Engine res claim rule ax
   -> ax
@@ -70,6 +72,8 @@ saturate engine source = go
 saturateOnce
   :: forall res claim rule ax
    . Ord claim
+  => Eq rule
+  => Eq ax
   => Engine res claim rule ax
   -> ax
   -> KB res claim rule ax
@@ -91,6 +95,8 @@ saturateOnce engine source kb =
 learn
   :: forall res claim rule ax
    . Ord claim
+  => Eq rule
+  => Eq ax
   => Eq res
   => Engine res claim rule ax
   -> KB res claim rule ax
