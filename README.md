@@ -38,8 +38,9 @@ The workspace:
   -p jtms-sudoku` prints a solve transcript with one proof explained.
 
 ```
-spago test          # both packages: kernel laws + sudoku soundness/honesty
-spago run -p jtms-sudoku
+spago test                              # kernel laws + sudoku soundness/honesty
+spago run -p jtms-sudoku                # solve transcript
+spago run -p jtms-sudoku -- page > pages/explain.html   # one proof, rendered
 ```
 
 **On the name**: a working name. It will be renamed before publication —

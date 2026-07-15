@@ -12,6 +12,7 @@ package:
     - integers
     - jtms-core
     - maybe
+    - node-process
     - ordered-collections
     - prelude
     - strings

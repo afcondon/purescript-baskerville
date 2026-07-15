@@ -10,10 +10,10 @@ import Data.Maybe (Maybe(..))
 import Data.Set as Set
 import Effect (Effect)
 import Effect.Console (log)
-import Jtms.Explain (axiomsBehind, explain)
+import Jtms.Explain (axiomsBehind, explain, explainFact)
 import Jtms.Kernel (Why(..), factCount, facts, justificationsFor)
 import Sudoku.Board (Cell(..), Digit(..), allCells)
-import Sudoku.Fixtures (blankColumnsPuzzle, diagonalsPuzzle, patternValue)
+import Sudoku.Fixtures (blankColumnsPuzzle, chainPuzzle, diagonalsPuzzle, patternValue)
 import Sudoku.Rules (SudokuClaim(..), SudokuRule(..), consistent)
 import Sudoku.Solve (isSolved, solve, solvedCount, valueAt)
 import Test.Assert (assert, assertEqual)
@@ -32,6 +32,19 @@ runSudokuTests = do
   do
     let kb = solve diagonalsPuzzle
     assert $ allCells # Array.all \c -> valueAt kb c == Just (patternValue c)
+
+  log "Sudoku: the chain puzzle solves fully, and its proofs have layers"
+  do
+    let kb = solve chainPuzzle
+    assert (isSolved kb)
+    assert (consistent kb)
+    assert $ allCells # Array.all \c -> valueAt kb c == Just (patternValue c)
+    -- at least one placement's proof rests on another deduced placement
+    let
+      proofSizes = facts kb # Array.mapMaybe \f -> case f.claim, f.why of
+        Is _ _, ByRule _ -> Just (Array.length (explainFact kb f).nodes)
+        _, _ -> Nothing
+    assert (Array.any (_ > 17) proofSizes)
 
   log "Sudoku: honesty — the blank-columns puzzle stalls, soundly"
   do
