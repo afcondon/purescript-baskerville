@@ -1,0 +1,7 @@
+output/
+.spago/
+node_modules/
+.psc-ide-port
+.purs-repl
+*.pdf
+.DS_Store
