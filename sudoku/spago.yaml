@@ -1,0 +1,24 @@
+package:
+  name: jtms-sudoku
+  description: >
+    Explainable Sudoku on the jtms kernel: every eliminated pencil mark is
+    a first-class fact carrying its derivation. Cliché as a solver, virgin
+    as an explainer.
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - integers
+    - jtms-core
+    - maybe
+    - ordered-collections
+    - prelude
+    - strings
+    - tuples
+  run:
+    main: Sudoku.Main
+  test:
+    main: Test.Sudoku.Main
+    dependencies:
+      - assert

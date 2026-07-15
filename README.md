@@ -11,12 +11,33 @@ demo), designed against three clients: kibitzer itself, Harmonia
 (scale/key inference and counterpoint linting), and ShapedSteer (plan
 facts over typed DAGs).
 
-**Status: design.** The sketch is
+**Status: kernel v0 + first client.** The design record is
 [`docs/library-sketch.md`](docs/library-sketch.md) — the layer stack
 (proof-term kernel, analyzable rule eDSL with a declared-read-set
 escape hatch, perspectives, oracle seam), the sets-vs-lattices carrier
 decision, and the extensions catalogue (windows, negation, Doyle,
 ATMS) with costed verdicts.
+
+The workspace:
+
+- **`core/`** (`jtms-core`) — `Jtms.Kernel` (facts as proof terms,
+  hash-consed feed, acyclicity by construction), `Jtms.Engine`
+  (prim-form rules, naive monotone saturation, `learn` as the stream
+  fold), `Jtms.Explain` (derivation DAGs by backward scan, depths,
+  grounding). Tested against a toy reachability client: the kernel
+  laws (acyclicity, hash-consing, monotonicity, first-justification,
+  fixpoint idempotence).
+- **`sudoku/`** (`jtms-sudoku`) — the second-client proof, and the
+  prune-facts-on-the-feed pole of the residue policy: `Not cell digit`
+  is a first-class claim with a derivation. Four singles-tier rules
+  (sole digit, peer elimination, naked/hidden single); fixtures
+  generated from the pattern grid, never hand-transcribed. `spago run
+  -p jtms-sudoku` prints a solve transcript with one proof explained.
+
+```
+spago test          # both packages: kernel laws + sudoku soundness/honesty
+spago run -p jtms-sudoku
+```
 
 **On the name**: a working name. It will be renamed before publication —
 it shouldn't claim "JTMS" publicly unless it implements Doyle's full

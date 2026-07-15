@@ -1,0 +1,19 @@
+package:
+  name: jtms-core
+  description: >
+    A justification-propagating inference kernel: facts as proof terms,
+    a hash-consed derivation DAG, and a monotone saturation engine.
+    The explanation is the product.
+  dependencies:
+    - arrays
+    - foldable-traversable
+    - maybe
+    - ordered-collections
+    - prelude
+    - tuples
+  test:
+    main: Test.Jtms.Main
+    dependencies:
+      - effect
+      - console
+      - assert

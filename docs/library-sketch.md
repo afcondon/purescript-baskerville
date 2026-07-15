@@ -6,6 +6,14 @@ kibitzer (Marginalia #251); the design record that led here is
 client hunts) and `kibitzer/docs/bayesian-layer.md` (the P column and why
 it stays out of this library).*
 
+**Status (same evening):** kernel v0 and the Sudoku client are built
+and tested — see the README for the workspace shape. The kernel
+followed layer 1 below almost verbatim (`Why = Axiom | ByRule`; the
+hash-consing index doubles as the premise lookup; `explain` is a
+single backward scan exploiting acyclicity-by-construction). Not yet
+started: the eDSL (rules are prim-form only), perspectives, the
+oracle/test-kit package, all-justifications recording.
+
 **On the name**: deliberately plain, and a working name only. Andrew's
 rule: don't call it a JTMS in public unless it *is* a full JTMS —
 Doyle's non-monotonic labelling and all — which v1 deliberately is not
