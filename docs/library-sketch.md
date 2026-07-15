@@ -279,14 +279,64 @@ Design against all three from day one; each stresses a different layer.
   backtracking, so the rig could conceivably run it live. Semi-naive
   (#5) is what makes that honest at tempo.
 
-### ShapedSteer (plan facts over typed DAGs)
+### ShapedSteer (plan facts + the build system)
 
-- **claims**: `Ready node | Blocked node | Stale node | UpToDate node`
-  etc., over the nodes/edges of a given workbench graph — the powerset
-  instance of the carrier.
-- **stresses**: `explain` as UX ("why is this node blocked" → the
-  derivation citing upstream facts), and retraction-by-replay (#4) —
-  graph edits invalidate observations, replay is the natural response.
+- **claims**: `Ready node | Blocked node | Stale node | UpToDate node
+  | InputChanged edge` etc., over the nodes/edges of a given workbench
+  graph — the powerset instance of the carrier.
+- **the build-system angle** (Andrew, 2026-07-15: strongly motivating):
+  Build Systems à la Carte factors a build into scheduler × rebuilder;
+  the JTMS slots in as the *rebuilder's evidence store*, with `explain`
+  answering "why did this rebuild" — the perennial most-wanted feature
+  of every build tool (Shake grew a reporting subsystem for it). The à
+  la carte port already lives in `purescript-ports`. Self-hosting in
+  the best way: ShapedSteer renders derivations, so staleness proofs
+  become things you look at in the graph view.
+- **stresses**: `explain` as UX, and retraction-by-replay (#4) — graph
+  edits invalidate observations, replay is the natural response.
+
+### The PureScript registry solver (aspirational, real)
+
+`purescript/registry-dev` ships `Registry.Solver` as a reusable
+PureScript library — a PubGrub-shaped, PureScript-native version
+solver whose community has already identified explanation quality as
+the hard part (Verity Scheel, "The Best Errors for Solving Dependency
+Versions"). The honest contribution shape is not replacing the solver
+but being *the provenance layer a solver reports through*: candidate
+versions as residues, constraint propagation as prunes-on-the-feed,
+failure narratives as derivation DAGs.
+
+- **claims**: `Excluded pkg version | Pinned pkg version |
+  RangeNarrowed pkg range`; residue = live candidate-version set per
+  package.
+- **stresses**: prune-facts at scale, and the finite-universe
+  assumption (version sets are finite but large — the first client
+  that might make #8 or indexing earn their keep).
+
+## Demos — one per layer
+
+The demo suite should map demos to the layers they exercise, not pile
+everything into one:
+
+- **Sudoku** (in-repo example) — kernel + eDSL + prune-facts. Cliché
+  as a solver, virgin as an *explainer*: every eliminated pencil mark
+  carries its derivation. Zero domain teaching (the library is the
+  only new thing on screen); human rule names (naked single, hidden
+  pair, pointing pair, X-wing) are rules-as-data with built-in grading
+  — the rule tier needed to crack a puzzle is its difficulty, so the
+  rule set is a difficulty grader. Monotone saturation solves exactly
+  the no-search subset; the bundled ⊨ enumerator solves everything;
+  the gap between them replays kibitzer's watcher-vs-Z3 story in a
+  domain everyone knows, and "this puzzle requires guessing" becomes a
+  theorem the library proves about itself. Singles/pairs are
+  eDSL-shaped; fish patterns deliberately stress the hatch boundary.
+- **kibitzer** — perspectives (stays the flagship, in its own repo;
+  acceptance test = core rebuilt on the library, goldens unchanged).
+- **Harmonia** — windows + the tonal-ambiguity meter.
+- **registry-index re-solving** — the real-world PubGrub story: feed
+  the locally-cloned `registry-index` manifests to a JTMS-backed
+  solve and emit "why was 2.3 excluded" narratives for actual
+  packages. A demo over real registry data is worth ten toys.
 
 ## Non-goals (v1)
 
