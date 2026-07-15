@@ -299,10 +299,26 @@ Design against all three from day one; each stresses a different layer.
 
 ## Open questions
 
-1. The FactId-vs-residue boundary in the lattice carrier: is
-   "resolution cites the pruning facts" enough provenance for every
-   client, or does Harmonia want the *prunes themselves* on the feed
-   (each note that killed a candidate key is arguably the story)?
+1. ~~The FactId-vs-residue boundary in the lattice carrier~~ —
+   **resolved 2026-07-15, same evening: prune-facts are client
+   policy, not a kernel decision.** The lattice-increment framing
+   makes an atom crystallising and a candidate dying the same kind of
+   thing (a proof-carrying increment); the client declares which
+   increments earn a FactId on the feed. Evidence both ways: Andrew's
+   own musical avenues (ambiguity, bitonality, dissonance) want the
+   *unresolved residue itself* as the product — the live candidate
+   set as a renderable object, log₂(candidates) as a tonal-ambiguity
+   meter in bits, with per-window residues (extension #1) letting
+   ambiguity re-bloom across phrases — and no prune narrative at all.
+   Meanwhile the prune-facts-on-the-feed clients are legion, with one
+   famous existence proof: PubGrub (Dart's version solver), whose
+   celebrated feature is compiling the prune trail into human-readable
+   failure derivations. Also: compiler candidate resolution ("candidate
+   not viable because…"), differential diagnosis (de Kleer's ATMS home
+   turf), fault localization/bisection, explainable puzzle solvers
+   (pencil-mark elimination), and kibitzer's own cascade brackets,
+   whose shrinks currently have no DAG edges and whose prune moments
+   are exactly where the entropy chart's bits land.
 2. How much of `Match` is applicative vs monadic: variable binding via
    pattern functors keeps analyzability; where exactly does the
    Cluedo/Harmonia rule corpus force value-dependent matching?
