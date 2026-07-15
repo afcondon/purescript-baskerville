@@ -10,9 +10,15 @@ it stays out of this library).*
 and tested — see the README for the workspace shape. The kernel
 followed layer 1 below almost verbatim (`Why = Axiom | ByRule`; the
 hash-consing index doubles as the premise lookup; `explain` is a
-single backward scan exploiting acyclicity-by-construction). Not yet
-started: the eDSL (rules are prim-form only), perspectives, the
-oracle/test-kit package, all-justifications recording.
+single backward scan exploiting acyclicity-by-construction). The eDSL
+(`Jtms.Rule`) landed the same night at its pragmatic monadic tier —
+`RuleM` = KB-reader × nondeterminism × premise/anchor writer, with
+`matches` (relation scan, auto-citing), `require` (point lookup,
+auto-citing), `absent` (negation-as-failure), `each`, `anchor`,
+`askKB` — and all four Sudoku rules rewrote into it with the
+proof-shape tests unchanged. Not yet: free-applicative analyzability
+(read-set extraction), perspectives, the oracle/test-kit package,
+all-justifications recording.
 
 **On the name**: deliberately plain, and a working name only. Andrew's
 rule: don't call it a JTMS in public unless it *is* a full JTMS —

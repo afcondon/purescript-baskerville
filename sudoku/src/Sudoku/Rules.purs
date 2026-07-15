@@ -27,16 +27,17 @@ module Sudoku.Rules
 import Prelude
 
 import Data.Array as Array
-import Data.Foldable (foldl)
+import Data.Foldable (foldl, traverse_)
 import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set (Set)
 import Data.Set as Set
-import Data.Tuple.Nested (type (/\), (/\))
-import Jtms.Engine (Derivation, Engine)
-import Jtms.Kernel (FactId, KB, facts, factIdFor)
-import Sudoku.Board (Cell, Digit, allDigits, peersOf, units)
+import Data.Tuple.Nested ((/\))
+import Jtms.Engine (Engine)
+import Jtms.Kernel (KB, facts)
+import Jtms.Rule (absent, each, matches, require, rule)
+import Sudoku.Board (Cell, Digit, allCells, allDigits, peersOf, units)
 
 data SudokuClaim
   = Is Cell Digit
@@ -117,72 +118,38 @@ consistent kb = noDoublePlacement && noContradiction
   noContradiction = placements # Array.all \(c /\ d) ->
     not (Set.member d (exclusionsAt v c))
 
+-- | All four rules in the eDSL: `matches`/`require` cite the premises
+-- | automatically, so a naked single's derivation carries its eight
+-- | eliminations without anyone threading FactIds. `absent` is the
+-- | negation-as-failure guard, sound at the fixpoint.
 engine :: Engine Unit SudokuClaim SudokuRule Given
 engine =
-  { rules: [ ruleSoleDigit, rulePeerElimination, ruleNakedSingle, ruleHiddenSingle ]
+  { rules:
+      [ rule SoleDigit do
+          p <- placement
+          other <- each (Array.filter (_ /= p.digit) allDigits)
+          pure (Not p.cell other)
+      , rule PeerElimination do
+          p <- placement
+          peer <- each (peersOf p.cell)
+          pure (Not peer p.digit)
+      , rule NakedSingle do
+          c <- each allCells
+          traverse_ (\d -> absent (Is c d)) allDigits
+          d <- each allDigits
+          traverse_ (\other -> require (Not c other)) (Array.filter (_ /= d) allDigits)
+          pure (Is c d)
+      , rule HiddenSingle do
+          house <- each units
+          d <- each allDigits
+          traverse_ (\c -> absent (Is c d)) house
+          c <- each house
+          traverse_ (\other -> require (Not other d)) (Array.filter (_ /= c) house)
+          pure (Is c d)
+      ]
   , refine: \_ -> identity
   }
-
-type Emit = Derivation SudokuClaim SudokuRule Given
-
-cite :: SudokuKB -> SudokuClaim -> Array FactId
-cite kb claim = Array.fromFoldable (factIdFor claim kb)
-
-ruleSoleDigit :: SudokuKB -> Array Emit
-ruleSoleDigit kb = do
-  let v = view kb
-  c /\ d <- Map.toUnfoldable v.placed :: Array (Cell /\ Digit)
-  other <- Array.filter (_ /= d) allDigits
-  pure
-    { claim: Not c other
-    , rule: SoleDigit
-    , premises: cite kb (Is c d)
-    , anchors: []
-    }
-
-rulePeerElimination :: SudokuKB -> Array Emit
-rulePeerElimination kb = do
-  let v = view kb
-  c /\ d <- Map.toUnfoldable v.placed :: Array (Cell /\ Digit)
-  peer <- peersOf c
-  pure
-    { claim: Not peer d
-    , rule: PeerElimination
-    , premises: cite kb (Is c d)
-    , anchors: []
-    }
-
-ruleNakedSingle :: SudokuKB -> Array Emit
-ruleNakedSingle kb = do
-  let v = view kb
-  c /\ gone <- Map.toUnfoldable v.excluded :: Array (Cell /\ Set Digit)
-  case Map.lookup c v.placed of
-    Just _ -> []
-    Nothing -> case Set.toUnfoldable (Set.difference (Set.fromFoldable allDigits) gone) of
-      [ d ] ->
-        pure
-          { claim: Is c d
-          , rule: NakedSingle
-          , premises: Array.concatMap (\g -> cite kb (Not c g)) (Set.toUnfoldable gone)
-          , anchors: []
-          }
-      _ -> []
-
-ruleHiddenSingle :: SudokuKB -> Array Emit
-ruleHiddenSingle kb = do
-  let v = view kb
-  house <- units
-  d <- allDigits
-  let placedHere = Array.any (\c -> placedAt v c == Just d) house
-  if placedHere then []
-  else case Array.filter (\c -> not (Set.member d (exclusionsAt v c))) house of
-    [ c ] ->
-      pure
-        { claim: Is c d
-        , rule: HiddenSingle
-        , premises:
-            Array.concatMap (\other -> cite kb (Not other d))
-              (Array.filter (_ /= c) house)
-        , anchors: []
-        }
-    _ -> []
+  where
+  placement = matches case _ of
+    Is c d -> Just { cell: c, digit: d }
+    Not _ _ -> Nothing

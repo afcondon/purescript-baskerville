@@ -6,6 +6,7 @@
         "core": {
           "dependencies": [
             "arrays",
+            "control",
             "foldable-traversable",
             "maybe",
             "ordered-collections",

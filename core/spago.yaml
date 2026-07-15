@@ -6,6 +6,7 @@ package:
     The explanation is the product.
   dependencies:
     - arrays
+    - control
     - foldable-traversable
     - maybe
     - ordered-collections

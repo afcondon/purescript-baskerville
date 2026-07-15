@@ -2,7 +2,16 @@
 -- | transitive-reachability client (claims `Edge a b` / `Reach a b`, one
 -- | rule composing reaches). Small enough to reason about exactly; rich
 -- | enough to exercise premises, saturation, and the DAG reader.
-module Test.KernelSpec (runKernelTests) where
+-- | Also exports the toy system itself, for Test.RuleSpec to rebuild in
+-- | the eDSL and compare.
+module Test.KernelSpec
+  ( runKernelTests
+  , Claim(..)
+  , Rule(..)
+  , Ax(..)
+  , ToyKB
+  , primEngine
+  ) where
 
 import Prelude
 
@@ -40,8 +49,8 @@ derive instance Eq Ax
 
 type ToyKB = KB Unit Claim Rule Ax
 
-engine :: Engine Unit Claim Rule Ax
-engine =
+primEngine :: Engine Unit Claim Rule Ax
+primEngine =
   { rules: [ ruleEdgeIsReach, ruleCompose ]
   , refine: \_ -> identity
   }
@@ -76,7 +85,7 @@ engine =
 
 feed :: Array (Array Claim) -> ToyKB
 feed observations =
-  foldl (learn engine) (emptyKB unit)
+  foldl (learn primEngine) (emptyKB unit)
     (Array.mapWithIndex (\i claims -> { source: Observed i, claims }) observations)
 
 chainKB :: ToyKB
@@ -115,7 +124,7 @@ runKernelTests = do
   log "Kernel: monotonicity — learning extends the feed, never rewrites it"
   do
     let before = feed [ [ Edge "a" "b" ], [ Edge "b" "c" ] ]
-    let after = learn engine before { source: Observed 9, claims: [ Edge "c" "d" ] }
+    let after = learn primEngine before { source: Observed 9, claims: [ Edge "c" "d" ] }
     assert (factCount after > factCount before)
     assertEqual
       { actual: Array.take (factCount before) (map _.claim (facts after))
@@ -173,5 +182,5 @@ runKernelTests = do
   log "Engine: saturate is idempotent at the fixpoint"
   do
     let kb = chainKB
-    let again = saturate engine (Observed 99) kb
+    let again = saturate primEngine (Observed 99) kb
     assertEqual { actual: factCount again, expected: factCount kb }
