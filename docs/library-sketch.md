@@ -16,9 +16,31 @@ single backward scan exploiting acyclicity-by-construction). The eDSL
 `matches` (relation scan, auto-citing), `require` (point lookup,
 auto-citing), `absent` (negation-as-failure), `each`, `anchor`,
 `askKB` — and all four Sudoku rules rewrote into it with the
-proof-shape tests unchanged. Not yet: free-applicative analyzability
-(read-set extraction), perspectives, the oracle/test-kit package,
-all-justifications recording.
+proof-shape tests unchanged. All-justifications recording landed the
+same night (`alsoWhy`/`justificationsFor`; derivation identity =
+content not source, via `sameDerivation`; acyclicity covers the
+primary proof only).
+
+**THE ACCEPTANCE TEST PASSED (2026-07-16, next morning).** kibitzer-core
+rebuilt on the kernel (kibitzer branch `jtms-port`): Knowledge became a
+domain facade (residue = {playerCount, handSizes, disjunctions}; the
+four indexed claim sets became scans over `knownClaims`; public
+Fact/Justification shapes unchanged, converted at the boundary), Infer
+kept every rule body verbatim and swapped its saturation plumbing for
+`Jtms.Engine`. The entire suite passed unchanged — goldens, cascade
+specs, four 25-seed properties — plus all four browser smoke suites on
+the live bundle. Frontend ripple: three lines. Two design findings:
+(a) **kibitzer asserts no bare axioms** — every observation lands under
+a named rule so the feed can say how it knows; `Axiom` is for clients
+that don't need that, not a requirement. (b) **Perspectives are client
+code** — observation projection is domain vocabulary (kibitzer's
+Observe never moved); what the library owns is the *law*: `subsumes`
+(a mind that witnessed more derives a superset), now a kernel export
+that clients pin over random streams. Layer 3 of the stack below is
+thereby resolved as a law + a pattern, not a module.
+
+Not yet: free-applicative analyzability (read-set extraction) and the
+semi-naive engine, the oracle/test-kit package.
 
 **On the name**: deliberately plain, and a working name only. Andrew's
 rule: don't call it a JTMS in public unless it *is* a full JTMS —

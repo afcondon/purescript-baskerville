@@ -24,7 +24,7 @@ import Effect (Effect)
 import Effect.Console (log)
 import Jtms.Engine (Engine, learn, saturate)
 import Jtms.Explain (axiomsBehind, depthOf, explain)
-import Jtms.Kernel (FactId(..), KB, Why(..), addFact, emptyKB, factCount, factIdFor, facts, isKnown, knownClaims)
+import Jtms.Kernel (FactId(..), KB, Why(..), addFact, emptyKB, factCount, factIdFor, facts, isKnown, knownClaims, subsumes)
 import Test.Assert (assert, assertEqual)
 
 data Claim
@@ -126,6 +126,8 @@ runKernelTests = do
     let before = feed [ [ Edge "a" "b" ], [ Edge "b" "c" ] ]
     let after = learn primEngine before { source: Observed 9, claims: [ Edge "c" "d" ] }
     assert (factCount after > factCount before)
+    assert (after `subsumes` before)
+    assert (not (before `subsumes` after))
     assertEqual
       { actual: Array.take (factCount before) (map _.claim (facts after))
       , expected: map _.claim (facts before)

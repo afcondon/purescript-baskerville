@@ -28,6 +28,7 @@ module Jtms.Kernel
   , justificationsFor
   , sameDerivation
   , isKnown
+  , subsumes
   , factIdFor
   , factFor
   , factById
@@ -45,6 +46,7 @@ import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..))
 import Data.Set (Set)
+import Data.Set as Set
 
 data Why rule ax
   = Axiom ax
@@ -163,6 +165,20 @@ justificationsFor claim kb = case factFor claim kb of
 
 isKnown :: forall res claim rule ax. Ord claim => claim -> KB res claim rule ax -> Boolean
 isKnown claim (KB kb) = Map.member claim kb.index
+
+-- | Does the first mind know everything the second does? This is the law
+-- | perspectives obey in a monotone system: a mind that witnessed a
+-- | superset of the observations derives a superset of the claims.
+-- | Perspectives themselves are client code (observation projection is
+-- | domain vocabulary — see kibitzer's Observe); the library owns the
+-- | property they must satisfy, and clients pin it over random streams.
+subsumes
+  :: forall res claim rule ax
+   . Ord claim
+  => KB res claim rule ax
+  -> KB res claim rule ax
+  -> Boolean
+subsumes bigger smaller = Set.subset (knownClaims smaller) (knownClaims bigger)
 
 -- | The fact recording a claim — the premise lookup a rule uses to cite
 -- | its inputs.
