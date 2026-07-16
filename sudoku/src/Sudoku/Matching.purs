@@ -1,9 +1,12 @@
 -- | The two graph algorithms Régin's alldifferent filtering needs, kept
--- | self-contained so the library repo stays free of hylograph
--- | dependencies (per the sketch's repo policy). The general-ecosystem
--- | versions belong in hylograph-graph (Marginalia #59 carries the
--- | feature request); when the demos-repo validation exercises that
--- | composition, this module is what it replaces.
+-- | local for a practical reason, not a policy one: hylograph-graph (a
+-- | pure algorithms package despite the branding — its Data.Graph.*
+-- | modules drag no SVG anywhere) now ships the general
+-- | `Data.Graph.Matching.maximumBipartiteMatching`, but this repo rides
+-- | the registry package set, so the dependency can only be taken after
+-- | hylograph-graph's next registry release. When that lands, this
+-- | module shrinks to the SCC helper (or vanishes if SCC ids are
+-- | contributed too).
 module Sudoku.Matching
   ( maximumMatching
   , sccIds
