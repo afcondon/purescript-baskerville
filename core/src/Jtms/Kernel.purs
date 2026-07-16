@@ -101,6 +101,8 @@ newtype KB res claim rule ax = KB
   , residue :: res
   }
 
+derive newtype instance (Eq res, Eq claim, Eq rule, Eq ax) => Eq (KB res claim rule ax)
+
 emptyKB :: forall res claim rule ax. res -> KB res claim rule ax
 emptyKB res = KB { facts: [], index: Map.empty, residue: res }
 
