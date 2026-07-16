@@ -136,6 +136,7 @@ pageFor kb dag =
       , legendEntry "#eef3ee" "#7fa87f" "peer elimination"
       , legendEntry "#fdeeed" "#d64541" "naked single"
       , legendEntry "#ececf4" "#5b5ba6" "hidden single"
+      , legendEntry "#fff4e5" "#e08b2d" "alldifferent (Régin)"
       , "</div>"
       , "<h2>Where the proof lives on the grid</h2>"
       , footprintGrid kb dag
@@ -169,6 +170,7 @@ ruleName = case _ of
   PeerElimination -> "peer elimination"
   NakedSingle -> "naked single"
   HiddenSingle -> "hidden single"
+  Alldifferent -> "alldifferent (Régin)"
 
 fillFor :: SudokuFact -> String
 fillFor f = case f.why of
@@ -178,6 +180,7 @@ fillFor f = case f.why of
     PeerElimination -> "#eef3ee"
     NakedSingle -> "#fdeeed"
     HiddenSingle -> "#ececf4"
+    Alldifferent -> "#fff4e5"
 
 strokeFor :: SudokuFact -> String
 strokeFor f = case f.why of
@@ -187,6 +190,7 @@ strokeFor f = case f.why of
     PeerElimination -> "#7fa87f"
     NakedSingle -> "#d64541"
     HiddenSingle -> "#5b5ba6"
+    Alldifferent -> "#e08b2d"
 
 -- | The 9×9 grid with the proof's cells shaded and the conclusion outlined.
 footprintGrid :: SudokuKB -> SudokuDag -> String

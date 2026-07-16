@@ -39,8 +39,29 @@ Observe never moved); what the library owns is the *law*: `subsumes`
 that clients pin over random streams. Layer 3 of the stack below is
 thereby resolved as a law + a pattern, not a module.
 
+**Layer 4 landed the same morning**: `jtms-testkit` (Oracle record,
+entailed/countermodel/unsound/gap, explainOr with Countermodel /
+Underived / NoWorlds). Sudoku supplied an MRV backtracking completion
+enumerator as its oracle, which then MEASURED the engine: the singles
+tier is provably complete on the chain puzzle (1 world, gap 0);
+blank-columns has exactly 1728 worlds and its stall was perfect
+(gap 0); and an oracle-driven hunt (`sudoku -- hunt`, greedy
+uniqueness-preserving removal over generated base grids) discovered
+`gapPuzzle` — 22 givens, unique solution, singles stall at 30/81,
+183-claim gap. **And then the hatch's poster boy closed it**: Régin's
+alldifferent as a self-contained prim rule (Kuhn's matching + Kosaraju
+SCC in `Sudoku.Matching`, kept local per the repo policy — the
+hylograph-graph contribution happens at demos-repo validation), with
+house-level certificates as premises: `alldifferentEngine` solves
+gapPuzzle 81/81, gap 0, soundness intact. The full arc — oracle finds
+the gap, algorithm closes it, oracle certifies closure — is pinned in
+Test.OracleSpec.
+
 Not yet: free-applicative analyzability (read-set extraction) and the
-semi-naive engine, the oracle/test-kit package.
+semi-naive engine (deliberately deferred: its API wants the
+free-applicative Match tier designed first); minimal Hall-set
+certificate extraction (current Régin certificates are house-level —
+sound but coarse).
 
 **On the name**: deliberately plain, and a working name only. Andrew's
 rule: don't call it a JTMS in public unless it *is* a full JTMS —

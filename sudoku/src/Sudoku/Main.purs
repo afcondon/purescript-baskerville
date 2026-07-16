@@ -17,11 +17,11 @@ import Jtms.Kernel (Why(..), factCount, facts)
 import Node.Process (argv)
 import Sudoku.Board (Cell(..), renderGrid)
 import Jtms.Testkit (gap, unsound)
-import Sudoku.Fixtures (blankColumnsPuzzle, chainPuzzle, diagonalsPuzzle)
+import Sudoku.Fixtures (blankColumnsPuzzle, chainPuzzle, diagonalsPuzzle, gapPuzzle)
 import Sudoku.Oracle (completions, oracleFor)
 import Sudoku.Page (page)
-import Sudoku.Rules (SudokuClaim(..), consistent)
-import Sudoku.Solve (solve, solvedCount, valueAt)
+import Sudoku.Rules (SudokuClaim(..), alldifferentEngine, consistent, engine)
+import Sudoku.Solve (solve, solveWith, solvedCount, valueAt)
 
 main :: Effect Unit
 main = do
@@ -91,19 +91,23 @@ printHunt = do
 printOracle :: Effect Unit
 printOracle = do
   let
-    measure name puzzle = do
+    measure name puzzle = measureWith name engine puzzle
+    measureWith name eng puzzle = do
       let enum = completions 2000 puzzle
       let oracle = oracleFor enum.grids
-      let kb = solve puzzle
+      let kb = solveWith eng puzzle
       log
         ( name <> ": worlds " <> show (Array.length enum.grids)
             <> (if enum.exhaustive then " (exhaustive)" else " (CAPPED)")
+            <> ", solved " <> show (solvedCount kb) <> "/81"
             <> ", unsound " <> show (Array.length (unsound oracle kb))
             <> ", gap " <> show (Array.length (gap oracle kb))
         )
   measure "diagonals   " diagonalsPuzzle
   measure "chain       " chainPuzzle
   measure "blankColumns" blankColumnsPuzzle
+  measureWith "gap/singles " engine gapPuzzle
+  measureWith "gap/regin   " alldifferentEngine gapPuzzle
 
 -- | The proof-size distribution over all deduced placements — the picker's
 -- | instrument panel.

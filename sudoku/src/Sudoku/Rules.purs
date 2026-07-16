@@ -18,6 +18,7 @@ module Sudoku.Rules
   , SudokuKB
   , View
   , engine
+  , alldifferentEngine
   , view
   , placedAt
   , candidatesFor
@@ -26,6 +27,7 @@ module Sudoku.Rules
 
 import Prelude
 
+import Control.Alternative (guard)
 import Data.Array as Array
 import Data.Foldable (foldl, traverse_)
 import Data.Map (Map)
@@ -34,10 +36,11 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set (Set)
 import Data.Set as Set
 import Data.Tuple.Nested ((/\))
-import Jtms.Engine (Engine)
-import Jtms.Kernel (KB, facts)
+import Jtms.Engine (Derivation, Engine)
+import Jtms.Kernel (FactId, KB, factIdFor, facts)
 import Jtms.Rule (absent, each, matches, require, rule)
 import Sudoku.Board (Cell, Digit, allCells, allDigits, peersOf, units)
+import Sudoku.Matching (maximumMatching, sccIds)
 
 data SudokuClaim
   = Is Cell Digit
@@ -51,12 +54,14 @@ instance Show SudokuClaim where
     Is c d -> "(Is " <> show c <> " " <> show d <> ")"
     Not c d -> "(Not " <> show c <> " " <> show d <> ")"
 
--- | Named so the UI can say them — the human solving vocabulary.
+-- | Named so the UI can say them — the human solving vocabulary, plus the
+-- | one algorithmic tier.
 data SudokuRule
   = SoleDigit -- a placed cell holds no other digit
   | PeerElimination -- a placed digit is nowhere among its peers
   | NakedSingle -- eight digits eliminated: the ninth is placed
   | HiddenSingle -- a digit with one home left in a house lives there
+  | Alldifferent -- Régin: a candidate in no maximum matching of its house
 
 derive instance Eq SudokuRule
 
@@ -66,6 +71,7 @@ instance Show SudokuRule where
     PeerElimination -> "PeerElimination"
     NakedSingle -> "NakedSingle"
     HiddenSingle -> "HiddenSingle"
+    Alldifferent -> "Alldifferent"
 
 -- | The only axiom source: the puzzle's givens.
 data Given = Given
@@ -153,3 +159,60 @@ engine =
   placement = matches case _ of
     Is c d -> Just { cell: c, digit: d }
     Not _ _ -> Nothing
+
+-- | The singles tier plus Régin's alldifferent — the escape-hatch tier.
+-- | Rule order: singles first (they own the human-vocabulary
+-- | justifications), the algorithm last.
+alldifferentEngine :: Engine Unit SudokuClaim SudokuRule Given
+alldifferentEngine = engine { rules = Array.snoc engine.rules ruleAlldifferent }
+
+-- | Régin (1994), the canonical global propagator, as a prim rule: a
+-- | house induces a bipartite cells↔digits graph; build a maximum
+-- | matching; in the square perfect-matching case an unmatched candidate
+-- | edge survives in SOME maximum matching iff its endpoints share a
+-- | strongly connected component of the alternating digraph — everything
+-- | else is eliminated. Constitutionally inexpressible in the eDSL; this
+-- | is what the hatch is FOR.
+-- |
+-- | Provenance is the house-level certificate: the elimination follows
+-- | from exactly the `Not` facts that shaped the house's candidate graph,
+-- | all cited. Sound but coarse — extracting the minimal Hall-set
+-- | certificate from the SCC structure is the marked refinement.
+ruleAlldifferent :: SudokuKB -> Array (Derivation SudokuClaim SudokuRule Given)
+ruleAlldifferent kb = do
+  let v = view kb
+  house <- units
+  let adjacency = Map.fromFoldable (house <#> \c -> c /\ candidatesFor v c)
+  let matching = maximumMatching adjacency
+  -- an imperfect matching means the observations contradict; stay silent
+  -- and let the client's consistency check tell that story
+  guard (Map.size matching == 9)
+  let
+    matchedCell d = Map.lookup d matching
+
+    -- alternating digraph: candidate edges cell→digit, matched digit→cell
+    graph :: Map RNode (Array RNode)
+    graph = Map.fromFoldable
+      ( (house <#> \c -> CellN c /\ map DigitN (Set.toUnfoldable (candidatesFor v c)))
+          <> (allDigits <#> \d -> DigitN d /\ Array.fromFoldable (CellN <$> matchedCell d))
+      )
+
+    comp = sccIds graph
+
+    houseNots = house # Array.concatMap \c ->
+      allDigits
+        # Array.filter (\d -> not (Set.member d (candidatesFor v c)))
+        # Array.concatMap (\d -> cite kb (Not c d))
+  c <- house
+  d <- Set.toUnfoldable (candidatesFor v c)
+  guard (matchedCell d /= Just c)
+  guard (Map.lookup (CellN c) comp /= Map.lookup (DigitN d) comp)
+  pure { claim: Not c d, rule: Alldifferent, premises: houseNots, anchors: [] }
+
+data RNode = CellN Cell | DigitN Digit
+
+derive instance Eq RNode
+derive instance Ord RNode
+
+cite :: SudokuKB -> SudokuClaim -> Array FactId
+cite kb claim = Array.fromFoldable (factIdFor claim kb)

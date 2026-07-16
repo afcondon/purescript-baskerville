@@ -9,12 +9,13 @@ import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Effect (Effect)
 import Effect.Console (log)
+import Jtms.Kernel (Why(..), facts)
 import Jtms.Testkit (Refutation(..), explainOr, gap, unsound)
 import Sudoku.Board (Cell(..), Digit(..))
 import Sudoku.Fixtures (blankColumnsPuzzle, chainPuzzle, gapPuzzle)
 import Sudoku.Oracle (completions, oracleFor)
-import Sudoku.Rules (SudokuClaim(..))
-import Sudoku.Solve (solve, solvedCount)
+import Sudoku.Rules (SudokuClaim(..), SudokuRule(..), alldifferentEngine)
+import Sudoku.Solve (solve, solveWith, solvedCount)
 import Test.Assert (assert, assertEqual)
 
 runOracleTests :: Effect Unit
@@ -53,6 +54,24 @@ runOracleTests = do
     assertEqual { actual: Array.length theGap, expected: 183 }
     let placements = theGap # Array.filter isPlacement
     assertEqual { actual: Array.length placements, expected: 51 }
+
+  log "Oracle: Régin closes the gap — 30/81 with 183 unreached becomes 81/81, gap 0"
+  do
+    let enum = completions 2000 gapPuzzle
+    let oracle = oracleFor enum.grids
+    let kb = solveWith alldifferentEngine gapPuzzle
+    assertEqual { actual: solvedCount kb, expected: 81 }
+    assertEqual { actual: unsound oracle kb, expected: [] }
+    assertEqual { actual: gap oracle kb, expected: [] }
+    -- the algorithmic tier genuinely participated, with cited premises
+    let
+      reginFacts = facts kb # Array.filter \f -> case f.why of
+        ByRule d -> d.rule == Alldifferent
+        Axiom _ -> false
+    assert (not (Array.null reginFacts))
+    assert $ reginFacts # Array.all \f -> case f.why of
+      ByRule d -> not (Array.null d.premises)
+      Axiom _ -> false
 
   log "Oracle: explainOr — a proof, a countermodel, or the honest Underived"
   do
