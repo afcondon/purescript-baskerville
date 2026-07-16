@@ -32,6 +32,7 @@
             "foldable-traversable",
             "integers",
             "jtms-core",
+            "jtms-testkit",
             "maybe",
             "node-process",
             "ordered-collections",
@@ -42,8 +43,26 @@
         },
         "test": {
           "dependencies": [
-            "assert"
+            "assert",
+            "either"
           ]
+        }
+      },
+      "jtms-testkit": {
+        "path": "testkit",
+        "core": {
+          "dependencies": [
+            "arrays",
+            "either",
+            "foldable-traversable",
+            "jtms-core",
+            "maybe",
+            "ordered-collections",
+            "prelude"
+          ]
+        },
+        "test": {
+          "dependencies": []
         }
       }
     },

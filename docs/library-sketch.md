@@ -374,6 +374,12 @@ failure narratives as derivation DAGs.
 The demo suite should map demos to the layers they exercise, not pile
 everything into one:
 
+*(Repo policy, Andrew 2026-07-16: anything visual — the hylograph-
+rendered Sudoku demo, cascade views — lives in the hylograph demos
+repo, NOT here; this library stays free of hylograph dependencies.
+The in-repo Sudoku example keeps only the dependency-free HTML
+generator.)*
+
 - **Sudoku** (in-repo example) — kernel + eDSL + prune-facts. Cliché
   as a solver, virgin as an *explainer*: every eliminated pencil mark
   carries its derivation. Zero domain teaching (the library is the

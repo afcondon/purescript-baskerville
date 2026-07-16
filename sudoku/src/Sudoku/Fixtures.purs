@@ -6,12 +6,14 @@ module Sudoku.Fixtures
   , diagonalsPuzzle
   , chainPuzzle
   , blankColumnsPuzzle
+  , gapPuzzle
   ) where
 
 import Prelude
 
 import Data.Array as Array
-import Sudoku.Board (Cell, Digit(..), Placement, allCells, colOf, rowOf)
+import Data.String (joinWith)
+import Sudoku.Board (Cell, Digit(..), Placement, allCells, colOf, parseGrid, rowOf)
 
 -- | value(r,c) = ((3r + r/3 + c) mod 9) + 1 — rows shift by 3 within a
 -- | band, by 1 across bands. Every row, column, and box is a permutation.
@@ -44,3 +46,24 @@ chainPuzzle = puzzleBlanking \c ->
 -- | stalling here is soundness, not weakness.)
 blankColumnsPuzzle :: Array Placement
 blankColumnsPuzzle = puzzleBlanking \c -> colOf c `mod` 3 == 0
+
+-- | Oracle-discovered (2026-07-16, `sudoku -- hunt`): a minimal
+-- | unique-solution puzzle on which the singles tier stalls at 30/81,
+-- | leaving a 183-claim completeness gap (51 placements the enumeration
+-- | entails that the rules cannot derive). Hunt recipe, re-derivable:
+-- | greedy uniqueness-preserving removal from completion #0 of the empty
+-- | grid, removal order i·37 mod 81. Frozen because the hunt is slow —
+-- | and copied from its output, never hand-transcribed. This is the
+-- | puzzle the Régin alldifferent prim rule exists to attack.
+gapPuzzle :: Array Placement
+gapPuzzle = parseGrid $ joinWith "\n"
+  [ "..5......"
+  , ".3..9.2.."
+  , ".4....7.3"
+  , ".1.8....6"
+  , "...2.9..."
+  , "...4.6..."
+  , ".....1.8."
+  , "3......5."
+  , "9.7.5.3.."
+  ]

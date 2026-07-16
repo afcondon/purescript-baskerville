@@ -1,0 +1,15 @@
+package:
+  name: jtms-testkit
+  description: >
+    The oracle seam: measure a rule system against a client-supplied
+    model enumeration. Soundness, the completeness gap, and explainOr —
+    a derivation, a countermodel, or the honest admission that the truth
+    is entailed but underived.
+  dependencies:
+    - arrays
+    - either
+    - foldable-traversable
+    - jtms-core
+    - maybe
+    - ordered-collections
+    - prelude
