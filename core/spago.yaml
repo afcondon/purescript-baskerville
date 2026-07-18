@@ -18,3 +18,5 @@ package:
       - effect
       - console
       - assert
+      - quickcheck
+      - order-theory
