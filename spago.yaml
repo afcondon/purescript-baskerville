@@ -1,6 +1,6 @@
 workspace:
   packageSet:
-    registry: 73.3.0
+    registry: 77.13.1
   extraPackages:
     # Path dep for the order-theory law suite (closure laws for saturate,
     # the NAF detector). Pin to a registry range once order-theory publishes.
