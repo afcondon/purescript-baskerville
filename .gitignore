@@ -5,3 +5,4 @@ node_modules/
 .purs-repl
 *.pdf
 .DS_Store
+.direnv/
