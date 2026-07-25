@@ -18,10 +18,9 @@ pronounces. That is exactly the ⊨ side's job description. Repo:
   dependencies; publishable to the registry alone (there is currently
   no SMT wrapper on Pursuit).
 - **`baskerville-mycroft`** — the oracle bridge. Path-dep on
-  Baskerville (`../purescript-jtms` — directory still bears the old
-  name). Lives here, not in the Baskerville repo, so the core stays
-  free of process/Aff dependencies (same policy that keeps hylograph
-  out).
+  Baskerville (`../purescript-baskerville`). Lives here, not in the
+  Baskerville repo, so the core stays free of process/Aff dependencies
+  (same policy that keeps hylograph out).
 
 The Cluedo demo lands in the kibitzer repo, not here.
 
