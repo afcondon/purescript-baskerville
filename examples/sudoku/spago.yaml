@@ -11,7 +11,7 @@ package:
     - foldable-traversable
     - integers
     - baskerville-core
-    - baskerville-testkit
+    - baskerville-conformance
     - maybe
     - node-process
     - ordered-collections

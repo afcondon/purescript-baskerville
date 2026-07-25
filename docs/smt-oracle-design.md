@@ -90,7 +90,7 @@ Options set up front: `:produce-models`, `:produce-unsat-cores`.
 Model parsing handles the `(define-fun name () Sort value)` shape z3
 emits; enum values decode by constructor name.
 
-### 4. `Baskerville.Oracle.Smt` — the bridge (in `baskerville-mycroft`)
+### 4. `Baskerville.Conformance.Smt` — the bridge (in `baskerville-mycroft`)
 
 The key observation that makes this clean: in Baskerville domains the
 **claim universe stays finite even when the world space explodes** —

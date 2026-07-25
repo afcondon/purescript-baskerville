@@ -18,7 +18,7 @@
 -- |     measured against Z3 and any client can now measure natively.
 -- |   * `explainOr` — the seam made into a function: a proof, or a
 -- |     countermodel, or `Underived` (the gap, pointed at one claim).
-module Baskerville.Testkit
+module Baskerville.Conformance
   ( Oracle
   , entailed
   , countermodel

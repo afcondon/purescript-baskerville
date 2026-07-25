@@ -1,5 +1,5 @@
 package:
-  name: baskerville-testkit
+  name: baskerville-conformance
   description: >
     The oracle seam: measure a rule system against a client-supplied model
     enumeration. Soundness, the completeness gap, and explainOr — a derivation,
@@ -11,7 +11,7 @@ package:
     location:
       githubOwner: afcondon
       githubRepo: purescript-baskerville
-      subdir: testkit
+      subdir: conformance
   dependencies:
     - arrays: ">=7.3.0 <8.0.0"
     - baskerville-core: ">=0.1.0 <0.2.0"

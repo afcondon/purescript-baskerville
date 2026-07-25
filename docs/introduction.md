@@ -3,7 +3,7 @@
 *For programmers who know PureScript or Haskell, but not truth
 maintenance systems. Everything here is grounded in the library's
 actual types; the modules referenced are `Baskerville.Kernel`, `Baskerville.Engine`,
-`Baskerville.Rule`, `Baskerville.Explain`, and `Baskerville.Testkit`.*
+`Baskerville.Rule`, `Baskerville.Explain`, and `Baskerville.Conformance`.*
 
 ## The problem: answers without reasons
 
@@ -304,7 +304,7 @@ the finite universes this library targets, the semantic side needs no
 SMT solver. It is *counting*: enumerate the consistent worlds, check
 the claim in each.
 
-`Baskerville.Testkit` packages this as an `Oracle` the client supplies —
+`Baskerville.Conformance` packages this as an `Oracle` the client supplies —
 worlds consistent with the observations, a satisfaction relation, the
 claim universe — and two instruments over it:
 

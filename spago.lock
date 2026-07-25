@@ -1,6 +1,37 @@
 {
   "workspace": {
     "packages": {
+      "baskerville-conformance": {
+        "path": "conformance",
+        "core": {
+          "dependencies": [
+            {
+              "arrays": ">=7.3.0 <8.0.0"
+            },
+            {
+              "baskerville-core": ">=0.1.0 <0.2.0"
+            },
+            {
+              "either": ">=6.1.0 <7.0.0"
+            },
+            {
+              "foldable-traversable": ">=6.0.0 <7.0.0"
+            },
+            {
+              "maybe": ">=6.0.0 <7.0.0"
+            },
+            {
+              "ordered-collections": ">=3.2.0 <4.0.0"
+            },
+            {
+              "prelude": ">=6.0.2 <7.0.0"
+            }
+          ]
+        },
+        "test": {
+          "dependencies": []
+        }
+      },
       "baskerville-core": {
         "path": "core",
         "core": {
@@ -58,8 +89,8 @@
         "core": {
           "dependencies": [
             "arrays",
+            "baskerville-conformance",
             "baskerville-core",
-            "baskerville-testkit",
             "console",
             "effect",
             "foldable-traversable",
@@ -77,37 +108,6 @@
             "assert",
             "either"
           ]
-        }
-      },
-      "baskerville-testkit": {
-        "path": "testkit",
-        "core": {
-          "dependencies": [
-            {
-              "arrays": ">=7.3.0 <8.0.0"
-            },
-            {
-              "baskerville-core": ">=0.1.0 <0.2.0"
-            },
-            {
-              "either": ">=6.1.0 <7.0.0"
-            },
-            {
-              "foldable-traversable": ">=6.0.0 <7.0.0"
-            },
-            {
-              "maybe": ">=6.0.0 <7.0.0"
-            },
-            {
-              "ordered-collections": ">=3.2.0 <4.0.0"
-            },
-            {
-              "prelude": ">=6.0.2 <7.0.0"
-            }
-          ]
-        },
-        "test": {
-          "dependencies": []
         }
       }
     },
