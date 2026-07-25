@@ -1,17 +1,24 @@
 package:
   name: baskerville-core
   description: >
-    A justification-propagating inference kernel: facts as proof terms,
-    a hash-consed derivation DAG, and a monotone saturation engine.
-    The explanation is the product.
+    A justification-propagating inference kernel: facts as proof terms, a
+    hash-consed derivation DAG, and a monotone saturation engine. The
+    explanation is the product.
+  publish:
+    version: 0.1.0
+    license: MIT
+    location:
+      githubOwner: afcondon
+      githubRepo: purescript-baskerville
+      subdir: core
   dependencies:
-    - arrays
-    - control
-    - foldable-traversable
-    - maybe
-    - ordered-collections
-    - prelude
-    - tuples
+    - arrays: ">=7.3.0 <8.0.0"
+    - control: ">=6.0.0 <7.0.0"
+    - foldable-traversable: ">=6.0.0 <7.0.0"
+    - maybe: ">=6.0.0 <7.0.0"
+    - ordered-collections: ">=3.2.0 <4.0.0"
+    - prelude: ">=6.0.2 <7.0.0"
+    - tuples: ">=7.0.0 <8.0.0"
   test:
     main: Test.Baskerville.Main
     dependencies:

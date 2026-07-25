@@ -1,15 +1,22 @@
 package:
   name: baskerville-testkit
   description: >
-    The oracle seam: measure a rule system against a client-supplied
-    model enumeration. Soundness, the completeness gap, and explainOr —
-    a derivation, a countermodel, or the honest admission that the truth
-    is entailed but underived.
+    The oracle seam: measure a rule system against a client-supplied model
+    enumeration. Soundness, the completeness gap, and explainOr — a derivation,
+    a countermodel, or the honest admission that the truth is entailed but
+    underived.
+  publish:
+    version: 0.1.0
+    license: MIT
+    location:
+      githubOwner: afcondon
+      githubRepo: purescript-baskerville
+      subdir: testkit
   dependencies:
-    - arrays
-    - either
-    - foldable-traversable
-    - baskerville-core
-    - maybe
-    - ordered-collections
-    - prelude
+    - arrays: ">=7.3.0 <8.0.0"
+    - baskerville-core: ">=0.1.0 <0.2.0"
+    - either: ">=6.1.0 <7.0.0"
+    - foldable-traversable: ">=6.0.0 <7.0.0"
+    - maybe: ">=6.0.0 <7.0.0"
+    - ordered-collections: ">=3.2.0 <4.0.0"
+    - prelude: ">=6.0.2 <7.0.0"
