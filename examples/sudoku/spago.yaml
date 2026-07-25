@@ -1,7 +1,7 @@
 package:
-  name: jtms-sudoku
+  name: baskerville-sudoku
   description: >
-    Explainable Sudoku on the jtms kernel: every eliminated pencil mark is
+    Explainable Sudoku on the baskerville kernel: every eliminated pencil mark is
     a first-class fact carrying its derivation. Cliché as a solver, virgin
     as an explainer.
   dependencies:
@@ -10,8 +10,8 @@ package:
     - effect
     - foldable-traversable
     - integers
-    - jtms-core
-    - jtms-testkit
+    - baskerville-core
+    - baskerville-testkit
     - maybe
     - node-process
     - ordered-collections

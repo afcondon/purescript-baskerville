@@ -16,7 +16,7 @@
 -- | expressive, not yet statically analyzable. The naive engine needs no
 -- | read-sets; when the semi-naive engine lands, eDSL rules grow theirs by
 -- | interpretation and prim rules keep declaring them.
-module Jtms.Rule
+module Baskerville.Rule
   ( RuleM
   , rule
   , each
@@ -34,28 +34,28 @@ import Control.Alternative (class Alternative)
 import Control.Plus (class Plus)
 import Data.Array as Array
 import Data.Maybe (Maybe(..))
-import Jtms.Kernel (FactId, KB, facts, factIdFor, isKnown)
-import Jtms.Engine (Rule)
+import Baskerville.Kernel (FactId, KB, facts, factIdFor, isKnown)
+import Baskerville.Engine (Rule)
 
-type Match ax a = { value :: a, premises :: Array FactId, anchors :: Array ax }
+type Match axiom a = { value :: a, premises :: Array FactId, anchors :: Array axiom }
 
 -- | A nondeterministic KB query accumulating the premises and anchors it
 -- | touched along each branch.
-newtype RuleM res claim rule ax a = RuleM
-  (KB res claim rule ax -> Array (Match ax a))
+newtype RuleM residue claim rule axiom a = RuleM
+  (KB residue claim rule axiom -> Array (Match axiom a))
 
 runRuleM
-  :: forall res claim rule ax a
-   . RuleM res claim rule ax a
-  -> KB res claim rule ax
-  -> Array (Match ax a)
+  :: forall residue claim rule axiom a
+   . RuleM residue claim rule axiom a
+  -> KB residue claim rule axiom
+  -> Array (Match axiom a)
 runRuleM (RuleM run) = run
 
-instance Functor (RuleM res claim rule ax) where
+instance Functor (RuleM residue claim rule axiom) where
   map f (RuleM run) = RuleM \kb ->
     run kb <#> \m -> { value: f m.value, premises: m.premises, anchors: m.anchors }
 
-instance Apply (RuleM res claim rule ax) where
+instance Apply (RuleM residue claim rule axiom) where
   apply (RuleM runF) (RuleM runA) = RuleM \kb -> do
     f <- runF kb
     a <- runA kb
@@ -65,10 +65,10 @@ instance Apply (RuleM res claim rule ax) where
       , anchors: f.anchors <> a.anchors
       }
 
-instance Applicative (RuleM res claim rule ax) where
+instance Applicative (RuleM residue claim rule axiom) where
   pure a = RuleM \_ -> [ { value: a, premises: [], anchors: [] } ]
 
-instance Bind (RuleM res claim rule ax) where
+instance Bind (RuleM residue claim rule axiom) where
   bind (RuleM run) f = RuleM \kb -> do
     m <- run kb
     m2 <- runRuleM (f m.value) kb
@@ -78,25 +78,25 @@ instance Bind (RuleM res claim rule ax) where
       , anchors: m.anchors <> m2.anchors
       }
 
-instance Monad (RuleM res claim rule ax)
+instance Monad (RuleM residue claim rule axiom)
 
-instance Alt (RuleM res claim rule ax) where
+instance Alt (RuleM residue claim rule axiom) where
   alt (RuleM x) (RuleM y) = RuleM \kb -> x kb <> y kb
 
-instance Plus (RuleM res claim rule ax) where
+instance Plus (RuleM residue claim rule axiom) where
   empty = RuleM \_ -> []
 
-instance Alternative (RuleM res claim rule ax)
+instance Alternative (RuleM residue claim rule axiom)
 
 -- | Seal a body into an engine rule. Each query result becomes one
 -- | derivation of the returned claim, citing the deduplicated premises
 -- | the branch touched.
 rule
-  :: forall res claim rule ax
-   . Eq ax
+  :: forall residue claim rule axiom
+   . Eq axiom
   => rule
-  -> RuleM res claim rule ax claim
-  -> Rule res claim rule ax
+  -> RuleM residue claim rule axiom claim
+  -> Rule residue claim rule axiom
 rule name (RuleM run) kb =
   run kb <#> \m ->
     { claim: m.value
@@ -106,15 +106,15 @@ rule name (RuleM run) kb =
     }
 
 -- | Enumerate a domain. Cites nothing.
-each :: forall res claim rule ax a. Array a -> RuleM res claim rule ax a
+each :: forall residue claim rule axiom a. Array a -> RuleM residue claim rule axiom a
 each xs = RuleM \_ -> xs <#> \x -> { value: x, premises: [], anchors: [] }
 
 -- | Match a pattern against the feed: one branch per fact whose claim
 -- | projects, each citing that fact. The Datalog relation scan.
 matches
-  :: forall res claim rule ax a
+  :: forall residue claim rule axiom a
    . (claim -> Maybe a)
-  -> RuleM res claim rule ax a
+  -> RuleM residue claim rule axiom a
 matches project = RuleM \kb ->
   facts kb # Array.mapMaybe \fact ->
     project fact.claim <#> \a ->
@@ -123,30 +123,30 @@ matches project = RuleM \kb ->
 -- | The claim must already be known; cites the fact recording it. The
 -- | point lookup to `matches`' scan.
 require
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => claim
-  -> RuleM res claim rule ax Unit
+  -> RuleM residue claim rule axiom Unit
 require claim = RuleM \kb -> case factIdFor claim kb of
   Just id -> [ { value: unit, premises: [ id ], anchors: [] } ]
   Nothing -> []
 
 -- | Negation as failure: succeed iff the claim is not on the feed.
 absent
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => claim
-  -> RuleM res claim rule ax Unit
+  -> RuleM residue claim rule axiom Unit
 absent claim = RuleM \kb ->
   if isKnown claim kb then []
   else [ { value: unit, premises: [], anchors: [] } ]
 
 -- | Attach a non-fact anchor (an event id, a timestamp) to this branch's
 -- | derivation.
-anchor :: forall res claim rule ax. ax -> RuleM res claim rule ax Unit
-anchor ax = RuleM \_ -> [ { value: unit, premises: [], anchors: [ ax ] } ]
+anchor :: forall residue claim rule axiom. axiom -> RuleM residue claim rule axiom Unit
+anchor axiom = RuleM \_ -> [ { value: unit, premises: [], anchors: [ axiom ] } ]
 
 -- | The raw KB — the residue reader, and the eDSL's own small escape
 -- | hatch. Reads through it cite nothing.
-askKB :: forall res claim rule ax. RuleM res claim rule ax (KB res claim rule ax)
+askKB :: forall residue claim rule axiom. RuleM residue claim rule axiom (KB residue claim rule axiom)
 askKB = RuleM \kb -> [ { value: kb, premises: [], anchors: [] } ]

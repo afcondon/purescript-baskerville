@@ -22,9 +22,9 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as Set
 import Effect (Effect)
 import Effect.Console (log)
-import Jtms.Engine (Engine, learn, saturate)
-import Jtms.Explain (axiomsBehind, depthOf, explain)
-import Jtms.Kernel (FactId(..), KB, Why(..), addFact, emptyKB, factCount, factIdFor, facts, isKnown, knownClaims, subsumes)
+import Baskerville.Engine (Engine, learn, saturate)
+import Baskerville.Explain (axiomsBehind, depthOf, explain)
+import Baskerville.Kernel (FactId(..), KB, Why(..), addFact, emptyKB, factCount, factIdFor, facts, isKnown, knownClaims, subsumes)
 import Test.Assert (assert, assertEqual)
 
 data Claim

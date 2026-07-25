@@ -1,5 +1,5 @@
 package:
-  name: jtms-testkit
+  name: baskerville-testkit
   description: >
     The oracle seam: measure a rule system against a client-supplied
     model enumeration. Soundness, the completeness gap, and explainOr —
@@ -9,7 +9,7 @@ package:
     - arrays
     - either
     - foldable-traversable
-    - jtms-core
+    - baskerville-core
     - maybe
     - ordered-collections
     - prelude

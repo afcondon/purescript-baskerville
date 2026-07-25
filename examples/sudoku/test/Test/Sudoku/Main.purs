@@ -12,4 +12,4 @@ main = do
   runSudokuTests
   runDagScaleTest
   runOracleTests
-  log "All jtms-sudoku tests passed."
+  log "All baskerville-sudoku tests passed."

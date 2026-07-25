@@ -15,8 +15,8 @@ import Data.Set (Set)
 import Data.Set as Set
 import Data.String (joinWith)
 import Data.Tuple (Tuple(..))
-import Jtms.Explain (DerivationDag, depthOf, explainFact)
-import Jtms.Kernel (Fact, FactId, Why(..), facts)
+import Baskerville.Explain (DerivationDag, depthOf, explainFact)
+import Baskerville.Kernel (Fact, FactId, Why(..), facts)
 import Sudoku.Board (Cell(..), Digit(..), colOf, rowOf)
 import Sudoku.Rules (Given, SudokuClaim(..), SudokuKB, SudokuRule(..))
 

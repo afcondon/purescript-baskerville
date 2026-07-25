@@ -1,5 +1,5 @@
 package:
-  name: jtms-core
+  name: baskerville-core
   description: >
     A justification-propagating inference kernel: facts as proof terms,
     a hash-consed derivation DAG, and a monotone saturation engine.
@@ -13,7 +13,7 @@ package:
     - prelude
     - tuples
   test:
-    main: Test.Jtms.Main
+    main: Test.Baskerville.Main
     dependencies:
       - effect
       - console

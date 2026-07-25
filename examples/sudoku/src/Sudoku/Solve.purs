@@ -12,10 +12,10 @@ import Prelude
 
 import Data.Array as Array
 import Data.Maybe (Maybe, isJust)
-import Jtms.Engine (learn)
-import Jtms.Kernel (emptyKB)
+import Baskerville.Engine (learn)
+import Baskerville.Kernel (emptyKB)
 import Sudoku.Board (Cell, Digit, Placement, allCells, parseGrid)
-import Jtms.Engine (Engine)
+import Baskerville.Engine (Engine)
 import Sudoku.Rules (Given(..), SudokuClaim(..), SudokuRule, SudokuKB, engine, placedAt, view)
 
 -- | Assert the givens as axioms and run the rules to fixpoint.

@@ -1,5 +1,5 @@
--- | A transcript demo (`spago run -p jtms-sudoku`), or the explain page
--- | (`spago run -p jtms-sudoku -- page > pages/explain.html`).
+-- | A transcript demo (`spago run -p baskerville-sudoku`), or the explain page
+-- | (`spago run -p baskerville-sudoku -- page > pages/explain.html`).
 module Sudoku.Main (main) where
 
 import Prelude
@@ -12,11 +12,11 @@ import Data.Traversable (for)
 import Data.Tuple (Tuple(..))
 import Effect (Effect)
 import Effect.Console (log)
-import Jtms.Explain (axiomsBehind, explain, explainFact)
-import Jtms.Kernel (Why(..), factCount, facts)
+import Baskerville.Explain (axiomsBehind, explain, explainFact)
+import Baskerville.Kernel (Why(..), factCount, facts)
 import Node.Process (argv)
 import Sudoku.Board (Cell(..), renderGrid)
-import Jtms.Testkit (gap, unsound)
+import Baskerville.Testkit (gap, unsound)
 import Sudoku.Fixtures (blankColumnsPuzzle, chainPuzzle, diagonalsPuzzle, gapPuzzle)
 import Sudoku.Oracle (completions, oracleFor)
 import Sudoku.Page (page)

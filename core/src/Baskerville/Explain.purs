@@ -5,7 +5,7 @@
 -- | strictly smaller ids): `explain` is a single backward scan over the
 -- | feed prefix ending at the root — no recursion, no visited set beyond
 -- | the growing needed-set.
-module Jtms.Explain
+module Baskerville.Explain
   ( DerivationDag
   , Edge
   , explain
@@ -23,39 +23,39 @@ import Data.Map (Map)
 import Data.Map as Map
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set as Set
-import Jtms.Kernel (Fact, FactId(..), KB, Why(..), factFor, facts)
+import Baskerville.Kernel (Fact, FactId(..), KB, Why(..), factFor, facts)
 
 type Edge = { from :: FactId, to :: FactId }
 
 -- | The proof behind one claim: every fact it transitively rests on
 -- | (feed order — premises before conclusions), and the premise edges
 -- | among them.
-type DerivationDag claim rule ax =
+type DerivationDag claim rule axiom =
   { root :: FactId
-  , nodes :: Array (Fact claim rule ax)
+  , nodes :: Array (Fact claim rule axiom)
   , edges :: Array Edge
   }
 
-premisesOf :: forall claim rule ax. Fact claim rule ax -> Array FactId
+premisesOf :: forall claim rule axiom. Fact claim rule axiom -> Array FactId
 premisesOf fact = case fact.why of
   Axiom _ -> []
   ByRule d -> d.premises
 
 explain
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => claim
-  -> KB res claim rule ax
-  -> Maybe (DerivationDag claim rule ax)
+  -> KB residue claim rule axiom
+  -> Maybe (DerivationDag claim rule axiom)
 explain claim kb = explainFact kb <$> factFor claim kb
 
 -- | The DAG below a fact: scan the feed prefix backwards from the root;
 -- | a fact is in the proof iff some already-needed fact cites it.
 explainFact
-  :: forall res claim rule ax
-   . KB res claim rule ax
-  -> Fact claim rule ax
-  -> DerivationDag claim rule ax
+  :: forall residue claim rule axiom
+   . KB residue claim rule axiom
+  -> Fact claim rule axiom
+  -> DerivationDag claim rule axiom
 explainFact kb root =
   let
     prefix = case root.id of FactId i -> Array.take (i + 1) (facts kb)
@@ -77,21 +77,21 @@ explainFact kb root =
 
 -- | Direct premises of a fact, resolved.
 supporters
-  :: forall res claim rule ax
-   . KB res claim rule ax
-  -> Fact claim rule ax
-  -> Array (Fact claim rule ax)
+  :: forall residue claim rule axiom
+   . KB residue claim rule axiom
+  -> Fact claim rule axiom
+  -> Array (Fact claim rule axiom)
 supporters kb fact = Array.mapMaybe lookup (premisesOf fact)
   where
   lookup id = Array.find (\f -> f.id == id) (facts kb)
 
 -- | The observation leaves a claim ultimately rests on.
 axiomsBehind
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => claim
-  -> KB res claim rule ax
-  -> Array (Fact claim rule ax)
+  -> KB residue claim rule axiom
+  -> Array (Fact claim rule axiom)
 axiomsBehind claim kb = case explain claim kb of
   Nothing -> []
   Just dag -> Array.filter isAxiom dag.nodes
@@ -102,7 +102,7 @@ axiomsBehind claim kb = case explain claim kb of
 
 -- | Longest premise chain below each fact (axioms at 0) — the cascade's
 -- | stagger order. One forward scan; premises are always already depthed.
-depthOf :: forall res claim rule ax. KB res claim rule ax -> Map FactId Int
+depthOf :: forall residue claim rule axiom. KB residue claim rule axiom -> Map FactId Int
 depthOf kb = foldl step Map.empty (facts kb)
   where
   step depths fact = Map.insert fact.id (depth depths fact) depths

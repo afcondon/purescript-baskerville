@@ -19,7 +19,7 @@ import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as Set
 import Data.Tuple.Nested ((/\))
-import Jtms.Testkit (Oracle)
+import Baskerville.Testkit (Oracle)
 import Sudoku.Board (Cell, Digit, Placement, allCells, allDigits, peersOf)
 import Sudoku.Rules (SudokuClaim(..))
 

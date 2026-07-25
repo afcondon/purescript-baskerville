@@ -70,6 +70,14 @@ Doyle's non-monotonic labelling and all — which v1 deliberately is not
 with some support: **Baskerville** — the Haskell propagator world
 already has `holmes`; we'd be the casebook.
 
+*(Resolved 2026-07-25: renamed **Baskerville** — packages
+`baskerville-*`, modules `Baskerville.*`. The naming gate closed the
+other way: rather than land row #6 to earn "JTMS", the library
+declines truth maintenance on the merits and presents itself as what
+it is. The argument — TM as incremental replay, the two reopen
+triggers, the additive packaging plan if a client ever pulls it — is
+recorded in `antecedents.md`.)*
+
 ## Thesis
 
 A justification-propagating inference engine as a standalone PureScript
@@ -519,3 +527,11 @@ are concrete:
 - Nate Faubion, *Free From Tree* — the defunctionalisation move, here
   applied to derivation (kernel, already done in kibitzer) and matching
   (rule eDSL, the new work).
+- Verity Scheel, `Registry.Solver` (registry-dev) + *The Best Errors
+  for Solving Dependency Versions* — production datapoint for open
+  question 1's other pole: provenance carried *inside* the lattice
+  values (`Sourced` bounds tagged with `SolverPosition`, merged by
+  `Semigroup` as `Intersection`s narrow to fixpoint) rather than as
+  facts on a feed. Bespoke monotone range-propagation, no external
+  solver; the relationship is report-through, not replace (see
+  `smt-oracle-design.md` non-goals).

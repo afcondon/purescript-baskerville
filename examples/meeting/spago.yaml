@@ -1,0 +1,17 @@
+package:
+  name: baskerville-meeting
+  description: >
+    The what-can-you-do example: scheduling a meeting, where the answer
+    carries the reason every other slot died. The smallest complete
+    client of the kernel — three rules, one page.
+  dependencies:
+    - arrays
+    - console
+    - effect
+    - foldable-traversable
+    - baskerville-core
+    - maybe
+    - prelude
+    - strings
+  run:
+    main: Meeting.Main

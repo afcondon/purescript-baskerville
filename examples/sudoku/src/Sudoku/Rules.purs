@@ -1,5 +1,5 @@
 -- | The inference system: claims, rule names, and the four singles-tier
--- | rules, all in prim form against the jtms kernel.
+-- | rules, all in prim form against the baskerville kernel.
 -- |
 -- | This client opts INTO prune-facts (the sketch's open question 1):
 -- | `Not cell digit` — an eliminated pencil mark — is a first-class claim
@@ -36,9 +36,9 @@ import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Set (Set)
 import Data.Set as Set
 import Data.Tuple.Nested ((/\))
-import Jtms.Engine (Derivation, Engine)
-import Jtms.Kernel (FactId, KB, factIdFor, facts)
-import Jtms.Rule (absent, each, matches, require, rule)
+import Baskerville.Engine (Derivation, Engine)
+import Baskerville.Kernel (FactId, KB, factIdFor, facts)
+import Baskerville.Rule (absent, each, matches, require, rule)
 import Sudoku.Board (Cell, Digit, allCells, allDigits, peersOf, units)
 import Sudoku.Matching (maximumMatching, sccIds)
 

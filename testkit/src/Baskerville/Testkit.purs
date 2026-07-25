@@ -18,7 +18,7 @@
 -- |     measured against Z3 and any client can now measure natively.
 -- |   * `explainOr` — the seam made into a function: a proof, or a
 -- |     countermodel, or `Underived` (the gap, pointed at one claim).
-module Jtms.Testkit
+module Baskerville.Testkit
   ( Oracle
   , entailed
   , countermodel
@@ -34,8 +34,8 @@ import Data.Array as Array
 import Data.Either (Either(..))
 import Data.Maybe (Maybe(..))
 import Data.Set as Set
-import Jtms.Explain (DerivationDag, explain)
-import Jtms.Kernel (KB, isKnown, knownClaims)
+import Baskerville.Explain (DerivationDag, explain)
+import Baskerville.Kernel (KB, isKnown, knownClaims)
 
 type Oracle world claim =
   { worlds :: Array world
@@ -58,10 +58,10 @@ countermodel oracle claim = Array.find (\w -> not (oracle.holds w claim)) oracle
 -- | Claims the engine believes that the oracle refutes. Soundness means
 -- | this is empty, on every stream, at every position.
 unsound
-  :: forall res world claim rule ax
+  :: forall residue world claim rule axiom
    . Ord claim
   => Oracle world claim
-  -> KB res claim rule ax
+  -> KB residue claim rule axiom
   -> Array claim
 unsound oracle kb =
   Set.toUnfoldable (knownClaims kb)
@@ -70,10 +70,10 @@ unsound oracle kb =
 -- | Claims true in every world that the engine has not derived — the
 -- | completeness gap.
 gap
-  :: forall res world claim rule ax
+  :: forall residue world claim rule axiom
    . Ord claim
   => Oracle world claim
-  -> KB res claim rule ax
+  -> KB residue claim rule axiom
   -> Array claim
 gap oracle kb =
   oracle.universe
@@ -89,12 +89,12 @@ data Refutation world
 
 -- | The seam: ⊢ if the engine can, else what ⊨ has to say about it.
 explainOr
-  :: forall res world claim rule ax
+  :: forall residue world claim rule axiom
    . Ord claim
   => Oracle world claim
-  -> KB res claim rule ax
+  -> KB residue claim rule axiom
   -> claim
-  -> Either (Refutation world) (DerivationDag claim rule ax)
+  -> Either (Refutation world) (DerivationDag claim rule axiom)
 explainOr oracle kb claim = case explain claim kb of
   Just dag -> Right dag
   Nothing

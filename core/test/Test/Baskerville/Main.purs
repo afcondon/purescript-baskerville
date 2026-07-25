@@ -1,4 +1,4 @@
-module Test.Jtms.Main where
+module Test.Baskerville.Main where
 
 import Prelude
 
@@ -13,4 +13,4 @@ main = do
   runKernelTests
   runRuleTests
   runOrderLawsTests
-  log "All jtms-core tests passed."
+  log "All baskerville-core tests passed."

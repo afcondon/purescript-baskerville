@@ -12,12 +12,12 @@
 -- |
 -- |   * `claim` — the client's atomic statements (finite, `Ord`).
 -- |   * `rule`  — the client's rule names, an ADT so the UI can say them.
--- |   * `ax`    — anchors: the non-fact provenance a client threads through
+-- |   * `axiom`    — anchors: the non-fact provenance a client threads through
 -- |     (event ids, timestamps, "given"), on axioms and derivations alike.
--- |   * `res`   — the client's residue: lattice state that refines between
+-- |   * `residue`   — the client's residue: lattice state that refines between
 -- |     facts (candidate sets shrinking) without itself earning `FactId`s.
 -- |     Clients on the plain powerset instance use `Unit`.
-module Jtms.Kernel
+module Baskerville.Kernel
   ( FactId(..)
   , Why(..)
   , Fact
@@ -48,23 +48,23 @@ import Data.Maybe (Maybe(..))
 import Data.Set (Set)
 import Data.Set as Set
 
-data Why rule ax
-  = Axiom ax
+data Why rule axiom
+  = Axiom axiom
   | ByRule
       { rule :: rule
-      , source :: ax
+      , source :: axiom
       , premises :: Array FactId
-      , anchors :: Array ax
+      , anchors :: Array axiom
       }
 
-derive instance (Eq rule, Eq ax) => Eq (Why rule ax)
+derive instance (Eq rule, Eq axiom) => Eq (Why rule axiom)
 
 -- | Derivation identity: what individuates a justification is its content
 -- | — the rule and what it consumed — not `source`, which only records
 -- | when the inference was first noticed. Rederiving the same conclusion
 -- | from the same premises while processing a later event is the same
 -- | derivation, and `addFact` must not collect it twice.
-sameDerivation :: forall rule ax. Eq rule => Eq ax => Why rule ax -> Why rule ax -> Boolean
+sameDerivation :: forall rule axiom. Eq rule => Eq axiom => Why rule axiom -> Why rule axiom -> Boolean
 sameDerivation = case _, _ of
   Axiom a, Axiom b -> a == b
   ByRule x, ByRule y -> x.rule == y.rule && x.premises == y.premises && x.anchors == y.anchors
@@ -87,39 +87,39 @@ instance Show FactId where
 -- | proofs — checking an alternative for well-founded support is ATMS
 -- | work (extensions catalogue #7). Recording them now is what keeps
 -- | that door open, and it is what lets a UI say "X-wing sees it too".
-type Fact claim rule ax =
+type Fact claim rule axiom =
   { id :: FactId
   , claim :: claim
-  , why :: Why rule ax
-  , alsoWhy :: Array (Why rule ax)
+  , why :: Why rule axiom
+  , alsoWhy :: Array (Why rule axiom)
   }
 
 -- | The knowledge base: an append-only feed of facts, the hash-consing
 -- | index over their claims (doubling as the premise lookup), and the
 -- | client's residue.
-newtype KB res claim rule ax = KB
-  { facts :: Array (Fact claim rule ax)
+newtype KB residue claim rule axiom = KB
+  { facts :: Array (Fact claim rule axiom)
   , index :: Map claim FactId
-  , residue :: res
+  , residue :: residue
   }
 
-derive newtype instance (Eq res, Eq claim, Eq rule, Eq ax) => Eq (KB res claim rule ax)
+derive newtype instance (Eq residue, Eq claim, Eq rule, Eq axiom) => Eq (KB residue claim rule axiom)
 
-emptyKB :: forall res claim rule ax. res -> KB res claim rule ax
-emptyKB res = KB { facts: [], index: Map.empty, residue: res }
+emptyKB :: forall residue claim rule axiom. residue -> KB residue claim rule axiom
+emptyKB residue = KB { facts: [], index: Map.empty, residue: residue }
 
 -- | Record a claim. News gets a fresh fact; a claim already on the feed
 -- | keeps its place and its primary justification, and the new derivation
 -- | is appended to `alsoWhy` if it is genuinely different — so a claim
 -- | rederivable six ways appears once, remembering all six.
 addFact
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => Eq rule
-  => Eq ax
-  => { claim :: claim, why :: Why rule ax }
-  -> KB res claim rule ax
-  -> KB res claim rule ax
+  => Eq axiom
+  => { claim :: claim, why :: Why rule axiom }
+  -> KB residue claim rule axiom
+  -> KB residue claim rule axiom
 addFact { claim, why } whole@(KB kb) = case Map.lookup claim kb.index of
   Just (FactId i) -> case Array.index kb.facts i of
     Nothing -> whole
@@ -142,28 +142,28 @@ addFact { claim, why } whole@(KB kb) = case Map.lookup claim kb.index of
 -- | Record an observed claim — a premise-free leaf of every derivation
 -- | that later cites it.
 assertAxiom
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => Eq rule
-  => Eq ax
-  => ax
+  => Eq axiom
+  => axiom
   -> claim
-  -> KB res claim rule ax
-  -> KB res claim rule ax
-assertAxiom ax claim = addFact { claim, why: Axiom ax }
+  -> KB residue claim rule axiom
+  -> KB residue claim rule axiom
+assertAxiom axiom claim = addFact { claim, why: Axiom axiom }
 
 -- | Every recorded justification for a claim, primary first.
 justificationsFor
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => claim
-  -> KB res claim rule ax
-  -> Array (Why rule ax)
+  -> KB residue claim rule axiom
+  -> Array (Why rule axiom)
 justificationsFor claim kb = case factFor claim kb of
   Nothing -> []
   Just fact -> Array.cons fact.why fact.alsoWhy
 
-isKnown :: forall res claim rule ax. Ord claim => claim -> KB res claim rule ax -> Boolean
+isKnown :: forall residue claim rule axiom. Ord claim => claim -> KB residue claim rule axiom -> Boolean
 isKnown claim (KB kb) = Map.member claim kb.index
 
 -- | Does the first mind know everything the second does? This is the law
@@ -173,48 +173,48 @@ isKnown claim (KB kb) = Map.member claim kb.index
 -- | domain vocabulary — see kibitzer's Observe); the library owns the
 -- | property they must satisfy, and clients pin it over random streams.
 subsumes
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
-  => KB res claim rule ax
-  -> KB res claim rule ax
+  => KB residue claim rule axiom
+  -> KB residue claim rule axiom
   -> Boolean
 subsumes bigger smaller = Set.subset (knownClaims smaller) (knownClaims bigger)
 
 -- | The fact recording a claim — the premise lookup a rule uses to cite
 -- | its inputs.
-factIdFor :: forall res claim rule ax. Ord claim => claim -> KB res claim rule ax -> Maybe FactId
+factIdFor :: forall residue claim rule axiom. Ord claim => claim -> KB residue claim rule axiom -> Maybe FactId
 factIdFor claim (KB kb) = Map.lookup claim kb.index
 
 factFor
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => claim
-  -> KB res claim rule ax
-  -> Maybe (Fact claim rule ax)
+  -> KB residue claim rule axiom
+  -> Maybe (Fact claim rule axiom)
 factFor claim kb = factIdFor claim kb >>= \id -> factById id kb
 
 factById
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . FactId
-  -> KB res claim rule ax
-  -> Maybe (Fact claim rule ax)
+  -> KB residue claim rule axiom
+  -> Maybe (Fact claim rule axiom)
 factById (FactId i) (KB kb) = Array.index kb.facts i
 
-facts :: forall res claim rule ax. KB res claim rule ax -> Array (Fact claim rule ax)
+facts :: forall residue claim rule axiom. KB residue claim rule axiom -> Array (Fact claim rule axiom)
 facts (KB kb) = kb.facts
 
-factCount :: forall res claim rule ax. KB res claim rule ax -> Int
+factCount :: forall residue claim rule axiom. KB residue claim rule axiom -> Int
 factCount (KB kb) = Array.length kb.facts
 
-knownClaims :: forall res claim rule ax. KB res claim rule ax -> Set claim
+knownClaims :: forall residue claim rule axiom. KB residue claim rule axiom -> Set claim
 knownClaims (KB kb) = Map.keys kb.index
 
-residue :: forall res claim rule ax. KB res claim rule ax -> res
+residue :: forall residue claim rule axiom. KB residue claim rule axiom -> residue
 residue (KB kb) = kb.residue
 
 withResidue
-  :: forall res claim rule ax
-   . (res -> res)
-  -> KB res claim rule ax
-  -> KB res claim rule ax
+  :: forall residue claim rule axiom
+   . (residue -> residue)
+  -> KB residue claim rule axiom
+  -> KB residue claim rule axiom
 withResidue f (KB kb) = KB kb { residue = f kb.residue }

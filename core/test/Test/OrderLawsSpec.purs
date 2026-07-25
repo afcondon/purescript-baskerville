@@ -35,8 +35,8 @@ import Data.Set (Set)
 import Data.Set as Set
 import Effect (Effect)
 import Effect.Console (log)
-import Jtms.Engine (Engine, Rule, saturate)
-import Jtms.Kernel (KB, assertAxiom, emptyKB, facts, knownClaims)
+import Baskerville.Engine (Engine, Rule, saturate)
+import Baskerville.Kernel (KB, assertAxiom, emptyKB, facts, knownClaims)
 import Test.Assert (assertTrue)
 import Test.QuickCheck (class Testable, quickCheckGen')
 import Test.QuickCheck.Gen (Gen, arrayOf, chooseInt, oneOf)
@@ -123,7 +123,7 @@ genClaims = Set.fromFoldable <$> arrayOf genClaim
 runOrderLawsTests :: Effect Unit
 runOrderLawsTests = do
   log ""
-  log "--- jtms-core — saturate as a lawful ClosureOperator (order-theory) ---"
+  log "--- baskerville-core — saturate as a lawful ClosureOperator (order-theory) ---"
   let c = closureFor lawfulEngine
 
   check "extensive — no retraction: s ⊆ saturate s" $

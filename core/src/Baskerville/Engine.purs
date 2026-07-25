@@ -14,7 +14,7 @@
 -- | Rule order within a pass is part of the observable spec: it decides
 -- | which justification a multiply-derivable fact receives, and clients
 -- | pin their feeds with golden tests.
-module Jtms.Engine
+module Baskerville.Engine
   ( Derivation
   , Rule
   , Engine
@@ -26,40 +26,40 @@ import Prelude
 
 import Data.Array as Array
 import Data.Foldable (foldl)
-import Jtms.Kernel (FactId, KB, Why(..), addFact, assertAxiom, factCount, residue, withResidue)
+import Baskerville.Kernel (FactId, KB, Why(..), addFact, assertAxiom, factCount, residue, withResidue)
 
 -- | What a single rule may emit: a claim, under the rule's name, citing
 -- | the prior facts it consumed and any non-fact anchors it drew on.
-type Derivation claim rule ax =
+type Derivation claim rule axiom =
   { claim :: claim
   , rule :: rule
   , premises :: Array FactId
-  , anchors :: Array ax
+  , anchors :: Array axiom
   }
 
-type Rule res claim rule ax = KB res claim rule ax -> Array (Derivation claim rule ax)
+type Rule residue claim rule axiom = KB residue claim rule axiom -> Array (Derivation claim rule axiom)
 
 -- | A client's inference system: its rules, and its residue refinement —
 -- | the step that moves lattice state (candidate sets shrinking) between
 -- | fact derivations. Clients with no residue pass `refine: \_ -> identity`.
-type Engine res claim rule ax =
-  { rules :: Array (Rule res claim rule ax)
-  , refine :: KB res claim rule ax -> res -> res
+type Engine residue claim rule axiom =
+  { rules :: Array (Rule residue claim rule axiom)
+  , refine :: KB residue claim rule axiom -> residue -> residue
   }
 
 -- | Run the rules to fixpoint. `source` stamps every fact derived during
 -- | this saturation with the processing context that triggered it — for
 -- | stream clients, the event whose avalanche this is.
 saturate
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => Eq rule
-  => Eq ax
-  => Eq res
-  => Engine res claim rule ax
-  -> ax
-  -> KB res claim rule ax
-  -> KB res claim rule ax
+  => Eq axiom
+  => Eq residue
+  => Engine residue claim rule axiom
+  -> axiom
+  -> KB residue claim rule axiom
+  -> KB residue claim rule axiom
 saturate engine source = go
   where
   go kb =
@@ -70,14 +70,14 @@ saturate engine source = go
       else go next
 
 saturateOnce
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => Eq rule
-  => Eq ax
-  => Engine res claim rule ax
-  -> ax
-  -> KB res claim rule ax
-  -> KB res claim rule ax
+  => Eq axiom
+  => Engine residue claim rule axiom
+  -> axiom
+  -> KB residue claim rule axiom
+  -> KB residue claim rule axiom
 saturateOnce engine source kb =
   let
     refined = withResidue (engine.refine kb) kb
@@ -93,14 +93,14 @@ saturateOnce engine source kb =
 -- | Record one observation's axioms, then saturate: the fold step that
 -- | makes a mind from a stream. `foldl (learn engine) kb observations`.
 learn
-  :: forall res claim rule ax
+  :: forall residue claim rule axiom
    . Ord claim
   => Eq rule
-  => Eq ax
-  => Eq res
-  => Engine res claim rule ax
-  -> KB res claim rule ax
-  -> { source :: ax, claims :: Array claim }
-  -> KB res claim rule ax
+  => Eq axiom
+  => Eq residue
+  => Engine residue claim rule axiom
+  -> KB residue claim rule axiom
+  -> { source :: axiom, claims :: Array claim }
+  -> KB residue claim rule axiom
 learn engine kb { source, claims } =
   saturate engine source (foldl (flip (assertAxiom source)) kb claims)
