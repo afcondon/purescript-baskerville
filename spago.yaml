@@ -3,15 +3,18 @@ package:
   description: >
     A justification-propagating inference kernel: facts as proof terms, a
     hash-consed derivation DAG, and a monotone saturation engine. The
-    explanation is the product. Bundles the conformance seam
-    (Baskerville.Conformance) — measure a rule system against a
-    client-supplied oracle: soundness, the completeness gap, explainOr.
+    explanation is the product. Bundles the conformance seam — measure a rule
+    system against a client-supplied oracle: soundness, the gap, explainOr.
   publish:
-    version: 0.1.2
+    version: 0.1.3
     license: MIT
     location:
       githubOwner: afcondon
       githubRepo: purescript-baskerville
+    owners:
+      - keytype: ecdsa-sha2-nistp521
+        public: AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAArkYOfYhQVU6qJgppVJwlKMnP8HwKrJezMWX/N9gpQCrpVk+YBANNXuzT7/wp9D55UCMTtbXrqxi6M+lPWF929yAGfzA+2lu8HzCEPbCPWhlcM3mO0HsYEJA7WLnMwzRXHvYdhVG9ZEdxq/MgDM1rLSpflE6mHpMsbvRitZ9oTkIWQLw==
+        id: afc@Andrews-MBP.lan
   dependencies:
     - arrays: ">=7.3.0 <8.0.0"
     - control: ">=6.0.0 <7.0.0"
